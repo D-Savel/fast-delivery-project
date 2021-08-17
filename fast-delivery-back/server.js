@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 const fsPromises = require('fs/promises')
 const { PrismaClient } = require('@prisma/client')
 const express = require('express')
@@ -42,11 +43,11 @@ app.use(timer)
 app.use(logger)
 app.use(shower)
 
-app.get('/feed', async (req, res) => {
-  const { adresse } = req.query
+app.get('/address', async (req, res) => {
+  const { address } = req.query
   let streetNumber = ''
-  // Clean and split query
-  let address1 = adresse.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+  // Clean and split request
+  let address1 = address.replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+°,\-.\/:;<=>?@\[\]^_`{|}~]/g, " ")
     .replace(/\s{2,}/g, " ")
     .toUpperCase()
     .split(' ')
@@ -62,41 +63,43 @@ app.get('/feed', async (req, res) => {
   address1.push('%')
   let addressQuery = address1.join('%')
 
-  try {
-
-    // const results = await prisma.$queryRaw`SELECT adresse,id FROM db_75 WHERE numero LIKE'%56%' LIMIT 25`
-    const results = await prisma.$queryRaw`SELECT adresse,id FROM db_75 WHERE adresse ILIKE ${addressQuery} AND numero ILIKE ${streetNumber} ORDER BY numero LIMIT 25;`
-
-    /* const results = await prisma.db_75.findMany({
-    where: {
-      numero: {
-        contains: 'A',
-        },
-    },
-  })
-  */
-
-    res.json(results)
-    console.log(adresse, 'adresse')
-    console.log(streetNumber)
-    console.log(address1, 'adresse 1')
-    console.log(addressQuery, 'adresse query')
-    console.log(results[0].adresse, 'first adresse result')
-    console.log(results, 'all addresses result')
+  const main = async () => {
+    const results = await prisma.$queryRaw`SELECT id,adresse,x,y FROM db_75 WHERE adresse ILIKE ${addressQuery} AND numero ILIKE ${streetNumber} ORDER BY numero LIMIT 25;`
+    console.log(results)
     console.log(results.length)
+    res.json(results)
+  }
 
-  }
-  catch {
-    ((e) => { throw e })
-  }
-  finally {
-    (async () => {
+  main()
+    .catch((e) => {
+      throw e
+    })
+    .finally(async () => {
       await prisma.$disconnect()
     })
-  }
 })
 
+app.post('/addressforxy', async (req, res) => {
+  const { x, y } = req.body
+  console.log(x, 'x')
+  console.log(y, 'y')
 
+  const main = async () => {
+    const results = await prisma.$queryRaw`SELECT adresse FROM db_75 WHERE x = ${x} AND y = ${y};`
+    console.log(results)
+    res.json(results)
+  }
+
+  main()
+    .catch((e) => {
+      throw e
+    })
+    .finally(async () => {
+      await prisma.$disconnect()
+    })
+})
+
+// eslint-disable-next-line no-unused-vars
 const server = app.listen(PORT, () =>
   console.log(`server ready at: http://localhost:${PORT}`),
 )
