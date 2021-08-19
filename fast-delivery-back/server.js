@@ -72,7 +72,7 @@ app.get('/address', async (req, res) => {
 
   main()
     .catch((e) => {
-      throw e
+      console.error(e)
     })
     .finally(async () => {
       await prisma.$disconnect()
