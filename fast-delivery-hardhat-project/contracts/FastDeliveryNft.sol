@@ -86,11 +86,13 @@ contract FastDeliveryNft is ERC721Enumerable {
 
     // delete delivery function
     function deleteDelivery(uint256 deliveryId_) public returns (bool) {
-        for (uint256 i = 0; i < _userDeliveriesId.length; i++) {
-            if (deliveryId_ == _userDeliveriesId[i]) {
+        for (uint256 i = 0; i < _userDeliveriesId[msg.sender].length; i++) {
+            if (deliveryId_ == _userDeliveriesId[msg.sender][i]) {
                 uint256 indexValue = i;
-                _userDeliveriesId[indexValue] = _userDeliveriesId[userDeliveriesArray.length - 1];
-                _userDeliveriesId.pop;
+                _userDeliveriesId[msg.sender][indexValue] = _userDeliveriesId[msg.sender][
+                    userDeliveriesArray.length - 1
+                ];
+                _userDeliveriesId[msg.sender].pop;
             }
 
             _burn(deliveryId_);
