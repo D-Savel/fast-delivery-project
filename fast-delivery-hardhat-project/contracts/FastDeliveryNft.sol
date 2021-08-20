@@ -9,6 +9,8 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract FastDeliveryNft is ERC721Enumerable {
     using Counters for Counters.Counter;
 
+    // TODO Add modifier only nft owner
+
     enum Status {
         onLine,
         attributed,
@@ -17,21 +19,27 @@ contract FastDeliveryNft is ERC721Enumerable {
         delivered
     }
 
+    Status public status;
+
     struct Delivery {
         Status status;
+        address parcelSender;
+        address deliveryman;
         string firstNameRecipient;
         string lastNameRecipient;
         uint256 addressXRecipient;
         uint256 addressYRecipient;
         string addressInfoRecipient;
-        string PhoneNumberRecipient;
+        string telRecipient;
         string mailRecipient;
         uint256 deliveryAmount;
-        uint256 deliveringCode;
+        uint256 deliveryCode;
+        uint256 onlineTimestamp;
+        uint256 collectTimeStamp;
         uint256 deliveredTimeStamp;
     }
 
-    uint256[] private userdliveries;
+    uint256[] private userDeliveriesArray;
     Counters.Counter private _deliveryId;
 
     mapping(uint256 => Delivery) private _deliveries;
@@ -39,39 +47,58 @@ contract FastDeliveryNft is ERC721Enumerable {
 
     constructor() ERC721("Delivery", "DLV") {}
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC721, ERC721Enumerable)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
-    }
-
-    function _baseURI() internal view virtual override(ERC721) returns (string memory) {
-        return "";
-    }
-
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override(ERC721, ERC721Enumerable) {
-        return super._beforeTokenTransfer(from, to, tokenId);
-    }
-
-    // mint NFT function
-    function createDelivery(string firstNameRecipient_) public returns (uint256) {
+    // mint delivery NFT function
+    function createDelivery(
+        string memory firstNameRecipient_,
+        string memory lastNameRecipient_,
+        uint256 addressXRecipient_,
+        uint256 addressYRecipient_,
+        string memory addressInfoRecipient_,
+        string memory telRecipient_,
+        string memory mailRecipient_,
+        uint256 deliveryAmount_
+    ) public returns (uint256) {
         uint256 newDeliveryId = _deliveryId.current();
         _mint(msg.sender, newDeliveryId);
-        _userDeliveriesId.push(newDeliveryId);
+        userDeliveriesArray.push(newDeliveryId);
         _deliveryId.increment();
-        _Deliveries[newDeliveryId] = Delivery(firstNameRecipient_);
+        status = Status.onLine;
+        _deliveries[newDeliveryId] = Delivery({
+            status: status,
+            parcelSender: msg.sender,
+            deliveryman: 0x0000000000000000000000000000000000000000,
+            firstNameRecipient: firstNameRecipient_,
+            lastNameRecipient: lastNameRecipient_,
+            addressXRecipient: addressXRecipient_,
+            addressYRecipient: addressYRecipient_,
+            addressInfoRecipient: addressInfoRecipient_,
+            telRecipient: telRecipient_,
+            mailRecipient: mailRecipient_,
+            deliveryAmount: deliveryAmount_,
+            deliveryCode: 0,
+            onlineTimestamp: block.timestamp,
+            collectTimeStamp: 0,
+            deliveredTimeStamp: 0
+        });
+        _userDeliveriesId[msg.sender].push(newDeliveryId);
         return newDeliveryId;
     }
 
-    function DeliveryInfo(uint256 deliveryId_) public view returns (Text memory) {
+    // delete delivery function
+    function deleteDelivery(uint256 deliveryId_) public returns (bool) {
+        for (uint256 i = 0; i < _userDeliveriesId.length; i++) {
+            if (deliveryId_ == _userDeliveriesId[i]) {
+                uint256 indexValue = i;
+                _userDeliveriesId[indexValue] = _userDeliveriesId[userDeliveriesArray.length - 1];
+                _userDeliveriesId.pop;
+            }
+
+            _burn(deliveryId_);
+        }
+        return true;
+    }
+
+    function DeliveryInfo(uint256 deliveryId_) public view returns (Delivery memory) {
         return _deliveries[deliveryId_];
     }
 }
