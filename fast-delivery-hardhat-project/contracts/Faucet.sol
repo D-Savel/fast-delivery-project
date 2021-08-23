@@ -24,7 +24,7 @@ contract Faucet {
     address private _tokenContractAddress;
     address private _tokenOwner;
     uint256 private _faucetAmount;
-    uint256 private constant _DELAY = 1 days; // Delay for faucet offer intervall.
+    uint256 private _delay = 1 days; // Delay for faucet offer intervall.
 
     /**
      * @dev Construtor intancies the tokens owner (seller) and link to ERC20 (DaidToken).
@@ -43,21 +43,31 @@ contract Faucet {
      * @notice Public function to offer the faucet amount tokens, this function is callable only :
      * if user address has not grab faucet tokens since last 1 day.
      * if user address is not the Tokens Owner.
+     * if delay not equal to 0.
      * @dev grabTokens call transferFrom function from ERC20 DaidToken contract.
      * it tranfers tokens from tokens owner to user address.
      */
 
     function grabTokens() public returns (bool) {
         require(msg.sender != _tokenOwner, "Faucet: Tokens owner can not buy his tokens");
+        require(_delay != 0, "Faucet : Faucet offer is over");
         if (_faucetDelay[msg.sender] == 0) {
             _faucetDelay[msg.sender] = block.timestamp;
         }
-        require(
-            _faucetDelay[msg.sender] <= block.timestamp,
-            "Faucet: You have already grabbed tokens since last day"
-        );
+        require(_faucetDelay[msg.sender] <= block.timestamp, "Faucet: You have already grabbed tokens since last day");
         _daidToken.transferFrom(_tokenOwner, msg.sender, _faucetAmount);
-        _faucetDelay[msg.sender] = block.timestamp + _DELAY;
+        _faucetDelay[msg.sender] = block.timestamp + _delay;
+        return true;
+    }
+
+    /**
+     * @notice Public function to set delay only for tokens owner.
+     * @dev if delay_ = 0, the faucet is stopped by require.
+     */
+
+    function setDelay(uint256 delay_) public returns (bool) {
+        require(msg.sender == _tokenOwner, "Faucet: Only tokens owner can set delay");
+        _delay = delay_;
         return true;
     }
 
@@ -67,8 +77,8 @@ contract Faucet {
     }
 
     /// @return Delay between each faucet offer.
-    function faucetDelay() public pure returns (uint256) {
-        return _DELAY;
+    function faucetDelay() public view returns (uint256) {
+        return _delay;
     }
 
     /**

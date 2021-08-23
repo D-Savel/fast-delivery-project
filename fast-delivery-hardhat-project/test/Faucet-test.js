@@ -56,12 +56,19 @@ describe('Faucet', function () {
         await expect(faucet.connect(tokenOwnerTest).grabTokens())
           .to.be.revertedWith('Faucet: Tokens owner can not buy his tokens');
       });
+      it('should set Delay to 0 and revert for trying grabing faucet if faucet delay = 0', async function () {
+        await faucet.connect(tokenOwnerTest).setDelay(0);
+        expect(await faucet.faucetDelay())
+          .to.equal(0);
+        await expect(faucet.connect(bob).grabTokens())
+          .to.be.revertedWith('Faucet : Faucet offer is over');
+      });
       it('should revert for trying grabing faucet Tokens again before 1 days faucet delay', async function () {
         await expect(faucet.connect(bob).grabTokens());
         await expect(faucet.connect(bob).grabTokens())
           .to.be.revertedWith('Faucet: You have already grabbed tokens since last day');
       });
-      it('should autorize  user grabing faucet Tokens again after 1 day delay is past', async function () {
+      it('should autorize user grabing faucet Tokens again after 1 day delay is past', async function () {
         await faucet.connect(bob).grabTokens();
         await ethers.provider.send('evm_increaseTime', [86401]); // 1 days + 1 sec. (time elapsed for block minting)= 86401 seconds
         await ethers.provider.send('evm_mine');

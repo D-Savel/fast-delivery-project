@@ -211,6 +211,7 @@ contract FastDeliveryNft is ERC721 {
         _burn(deliveryId_);
         _deliveries[deliveryId_].status = Status.delivered;
         _deliveries[deliveryId_].deliveredTimestamp = block.timestamp;
+        _daidToken.transferFrom(address(this), msg.sender, _deliveries[deliveryId_].deliveryAmount);
         return true;
     }
 
