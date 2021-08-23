@@ -16,7 +16,7 @@ contract Ico {
     /// @dev openzeppelin Address library usage for payable function
     using Address for address payable;
 
-    /// @dev ERC20 contract choose for ICO ERC20 contract choose for ICO
+    /// @dev ERC20 contract choose for Daid tokens ICO
     DaidToken private _daidToken;
 
     address private _tokenContractAddress;
