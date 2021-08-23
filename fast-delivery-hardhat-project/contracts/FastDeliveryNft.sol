@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "./DaidToken.sol";
 
 contract FastDeliveryNft is ERC721 {
     // library usage;
@@ -33,13 +34,13 @@ contract FastDeliveryNft is ERC721 {
         string addressInfoRecipient;
         string telRecipient;
         string mailRecipient;
-        string deliveryDay_;
+        string deliveryDay;
         uint256 deliveryAmount;
         string deliveryCode;
         uint256 onlineTimestamp;
         uint256 attributionTimestamp;
-        uint256 collectTimeStamp;
-        uint256 deliveredTimeStamp;
+        uint256 collectTimestamp;
+        uint256 deliveredTimestamp;
     }
 
     address private _tokenContractAddress;
@@ -53,7 +54,17 @@ contract FastDeliveryNft is ERC721 {
     constructor(address tokenContractAddress_) ERC721("Delivery", "DLV") {
         _tokenContractAddress = tokenContractAddress_; //Token smartcontract address
         _daidToken = DaidToken(tokenContractAddress_); // Token smartcontract link
-        createDelivery("Delivery0", "Delivery0", "Delivery0", "Delivery0", "Delivery0", "Delivery0", "Delivery0", 0);
+        createDelivery(
+            "Delivery0",
+            "Delivery0",
+            "Delivery0",
+            "Delivery0",
+            "Delivery0",
+            "Delivery0",
+            "Delivery0",
+            "Delivery0",
+            0
+        );
     }
 
     // mint delivery NFT
@@ -69,7 +80,7 @@ contract FastDeliveryNft is ERC721 {
         uint256 deliveryAmount_
     ) public returns (uint256) {
         require(
-            msg.value < _daidToken.balanceOf(msg.sender),
+            deliveryAmount_ < _daidToken.balanceOf(msg.sender),
             "FastDeliveryNft: not enough DAID tokens for adding this delivery"
         );
         // Create delivery Nft
@@ -90,11 +101,11 @@ contract FastDeliveryNft is ERC721 {
             mailRecipient: mailRecipient_,
             deliveryDay: deliveryDay_,
             deliveryAmount: deliveryAmount_,
-            deliveryCode: 0,
+            deliveryCode: "0",
             onlineTimestamp: block.timestamp,
             attributionTimestamp: 0,
-            collectTimeStamp: 0,
-            deliveredTimeStamp: 0
+            collectTimestamp: 0,
+            deliveredTimestamp: 0
         });
         _userDeliveriesId[msg.sender].push(newDeliveryId);
         // Transfer delivery price to deliveries deposit fund
@@ -105,9 +116,9 @@ contract FastDeliveryNft is ERC721 {
 
     // delete delivery by parcel sender before parcel has been chosen by a deliveryman
     function deleteDelivery(uint256 deliveryId_) public returns (bool) {
-        require(deliveryId_ < _deliveryId, "FastDeliveryNft: The Id of this delivery does not exist");
+        require(deliveryId_ < _deliveryId.current(), "FastDeliveryNft: The Id of this delivery does not exist");
         require(
-            _deliveries[deliveryId_].status == 0,
+            _deliveries[deliveryId_].status == Status.onLine,
             "FastDeliveryNft: To be deleted the delivery status must be on line"
         );
         require(
@@ -116,7 +127,7 @@ contract FastDeliveryNft is ERC721 {
         );
         uint256 index;
         if (deliveryId_ == _userDeliveriesId[msg.sender].length - 1) {
-            index = i;
+            index = deliveryId_;
         } else {
             for (uint256 i = 0; i < _userDeliveriesId[msg.sender].length; i++) {
                 if (deliveryId_ == _userDeliveriesId[msg.sender][i]) index = i;
@@ -130,8 +141,8 @@ contract FastDeliveryNft is ERC721 {
     }
 
     // Attribute a delivery to a deliveryman
-    function attributeDelivery(uint256 deliveryId_, address deliverymanAddress_) public returns (bool) {
-        require(deliveryId_ < _deliveryId, "FastDeliveryNft: The Id of this delivery does not exist");
+    function attributeDelivery(uint256 deliveryId_) public returns (bool) {
+        require(deliveryId_ < _deliveryId.current(), "FastDeliveryNft: The Id of this delivery does not exist");
         _userDeliveriesId[msg.sender].push(deliveryId_);
         _deliveries[deliveryId_].status = Status.attributed;
         _deliveries[deliveryId_].deliveryman = msg.sender;
@@ -141,18 +152,18 @@ contract FastDeliveryNft is ERC721 {
 
     // Cancel delivery function by deliveryman before parcel has been collected
     function cancelDelivery(uint256 deliveryId_) public returns (bool) {
-        require(deliveryId_ < _deliveryId, "FastDeliveryNft: The Id of this delivery does not exist");
+        require(deliveryId_ < _deliveryId.current(), "FastDeliveryNft: The Id of this delivery does not exist");
         require(
-            _deliveries[deliveryId_].status == 1,
+            _deliveries[deliveryId_].status == Status.attributed,
             "FastDeliveryNft: to be deleted the delivery status must be attributed"
         );
         require(
-            ownerOf(deliveryId_ == msg.sender),
+            ownerOf(deliveryId_) == msg.sender,
             "FastDeliveryNft: You must be the deliveryman oh this parcel to delete this delivery"
         );
         uint256 index;
         if (deliveryId_ == _userDeliveriesId[msg.sender].length - 1) {
-            index = i;
+            index = deliveryId_;
         } else {
             for (uint256 i = 0; i < _userDeliveriesId[msg.sender].length; i++) {
                 if (deliveryId_ == _userDeliveriesId[msg.sender][i]) index = i;
@@ -166,54 +177,38 @@ contract FastDeliveryNft is ERC721 {
     }
 
     // Collect delivery by a deliveryman
-    function collectDelivery(uint256 deliveryId_, deliveryCode_) public returns (bool) {
-        require(deliveryId_ < _deliveryId, "FastDeliveryNft: The Id of this delivery does not exist");
-        require(
-            _deliveries[deliveryId_].status == 1,
-            "FastDeliveryNft: to be colected the delivery status must be attributed"
-        );
-        transferFrom(_deliveries[deliveryId_].parcelSender, _deliveries[deliveryId_].deliveryman, deliveryId_);
-        _userDeliveriesId[msg.sender].push(deliveryId_);
-        _deliveries[deliveryId_].status = Status.indelivery;
-        _deliveries[deliveryId_].deliveryman = msg.sender;
-        _deliveries[deliveryId_].deliveryCode = deliveryCode_;
-        _deliveries[deliveryId_].attributionTimestamp = block.timestamp;
-        return true;
-    }
-
-    // Collect delivery by a deliveryman
-    function collectDelivery(uint256 deliveryId_, deliveryCode_) public returns (bool) {
+    function collectDelivery(uint256 deliveryId_, string memory deliverycode_) public returns (bool) {
         require(
             _deliveries[deliveryId_].parcelSender == msg.sender,
             "FastDeliveryNft: Only parcel sender can access this function"
         );
-        require(deliveryId_ < _deliveryId, "FastDeliveryNft: The Id of this delivery does not exist");
+        require(deliveryId_ < _deliveryId.current(), "FastDeliveryNft: The Id of this delivery does not exist");
         require(
-            _deliveries[deliveryId_].status == 1,
+            _deliveries[deliveryId_].status == Status.attributed,
             "FastDeliveryNft: to be collected, the delivery status must be attributed"
         );
         transferFrom(_deliveries[deliveryId_].parcelSender, _deliveries[deliveryId_].deliveryman, deliveryId_);
         _deliveries[deliveryId_].status = Status.inDelivery;
-        _deliveries[deliveryId_].deliveryCode = deliveryCode_;
+        _deliveries[deliveryId_].deliveryCode = deliverycode_;
         _deliveries[deliveryId_].collectTimestamp = block.timestamp;
         return true;
     }
 
-    function collectDelivery(uint256 deliveryId_, deliveryCode_) public returns (bool) {
+    function delivered(uint256 deliveryId_, string memory code_) public returns (bool) {
         require(
-            deliveryCode_ == _deliveries[deliveryId_].deliveryCode,
+            keccak256(abi.encodePacked(code_)) == keccak256(abi.encodePacked(_deliveries[deliveryId_].deliveryCode)),
             "FastDeliveryNft: The delivery code for this delivery Id is false"
         );
         require(
             _deliveries[deliveryId_].deliveryman == msg.sender,
             "FastDeliveryNft: Only deliveryman can access this function"
         );
-        require(deliveryId_ < _deliveryId, "FastDeliveryNft: The Id of this delivery does not exist");
+        require(deliveryId_ < _deliveryId.current(), "FastDeliveryNft: The Id of this delivery does not exist");
         require(
-            _deliveries[deliveryId_].status == 2,
+            _deliveries[deliveryId_].status == Status.inDelivery,
             "FastDeliveryNft: to be delivered, the delivery status must be in delivery"
         );
-        burn_(deliveryId_);
+        _burn(deliveryId_);
         _deliveries[deliveryId_].status = Status.delivered;
         _deliveries[deliveryId_].deliveredTimestamp = block.timestamp;
         return true;
