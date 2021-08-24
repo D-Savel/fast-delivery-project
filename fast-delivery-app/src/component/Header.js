@@ -27,7 +27,7 @@ function Header(props) {
       >
         < MetaMaskParameters />
         <VStack py="1">
-          <Heading align="center" as="h1" color="white">SmartWords</Heading>
+          <Heading align="center" as="h1" color="white">FastDelivery</Heading>
           <Heading align="center" as="h1" color="white">App</Heading>
           {!web3State.isLogged && (<Button colorScheme="orange" onClick={login}>login MetaMask
           </Button>)}

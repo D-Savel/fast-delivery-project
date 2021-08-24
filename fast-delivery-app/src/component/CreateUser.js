@@ -1,9 +1,10 @@
 /* eslint-disable no-useless-escape */
-import { useContext, useState } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import {
   Input,
-  Textarea,
+  List,
+  ListItem,
   HStack,
   FormControl,
   FormLabel,
@@ -13,39 +14,60 @@ import {
   Flex,
   Heading,
   VStack,
+  Select,
   useToast,
 } from '@chakra-ui/react'
-
-import { SmartWordsContext } from '../App'
+import axios from 'axios'
+import { FastDeliveryUserContext } from '../App'
 
 function CreateUser() {
 
-  const smartWords = useContext(SmartWordsContext)
+  const [loading, setLoading] = useState(false);
+  const [userAddress, setUserAddress] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isAdress, setisAdress] = useState(true);
+
+  const fastDeliveryUser = useContext(FastDeliveryUserContext)
   const [isLoading, setIsLoading] = useState(false)
-  const [textContent, setTextContent] = useState('')
-  const [textTitle, setTextTitle] = useState('')
-  const [textUrl, setTextUrl] = useState('')
+  const [userProfil, setUserProfil] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [companySiren, setCompanySiren] = useState('')
+  const [addressInfo, setAddressInfo] = useState('')
+  const [tel, setTel] = useState('')
+  const [mail, setMail] = useState('')
   const toast = useToast()
 
+  const handleChange = (e) => setUserAddress(e.target.value)
+  const handleClickResult = (e) => {
+    setUserAddress(e.target.textContent)
+  }
+
+  useEffect(() => {
+    let url = `http://localhost:3333/address/?address=${userAddress}`
+    console.log(url, 'url')
+    const request = async () => {
+      setLoading(true)
+      try {
+        let response = await axios.get(url)
+        setSearchResults(response.data)
+        if (response.data.length) {
+          userAddress.toUpperCase().trim().localeCompare(response.data[0].adresse.trim()) === 0 ? setisAdress(true) : setisAdress(false)
+        }
+      } catch (e) {
+        console.log(e)
+      } finally {
+        setLoading(false)
+      }
+    }
+    request()
+  }
+    , [userAddress])
+
   const handleClickRegister = async () => {
-    // eslint-disable-next-line no-useless-escape
-    const regex = /[\+?*//.,\/#!$%\^&\*;:{}=\-_`~()§/\s]/g
-    let cleanTextContent = (textContent.replace(regex, ""))
-      .toUpperCase()
-    let textHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(cleanTextContent))
     try {
       setIsLoading(true)
-      let textAddress = await smartWords.textHashOf(textHash)
-      if (textAddress !== ethers.constants.AddressZero) {
-        toast({
-          title: 'This text has already been registered',
-          description: `Your NFT has not been created by ${textAddress}\n
-          le `,
-          duration: 9000,
-          status: 'error',
-          isClosable: true,
-        })
-      } else {
+      /*
         let tx = await smartWords.registerText(textTitle, textHash, textUrl)
         await tx.wait()
         toast({
@@ -59,7 +81,8 @@ function CreateUser() {
         setTextContent('')
         setTextTitle('')
         setTextUrl('')
-      }
+            }
+            */
     } catch (e) {
       if (e.code) {
         toast({
@@ -78,58 +101,118 @@ function CreateUser() {
 
   return (
 
-    <Flex flexDirection="column" alignItems="center" m="1">
-      <Center border="1px" borderRadius="lg" borderColor="dark" bg="blue.500" w="600px" color="white" mb="1" p="1">
-        <Heading size="xl">Create my NFT Text</Heading>
+    <Flex flexDirection="column" alignItems="center" pb="8" m="1">
+      <Center border="1px" borderRadius="lg" borderColor="dark" bg="blue.500" w="420px" color="white" mb="1" p="1">
+        <Heading size="xl">Fast Delivery register</Heading>
       </Center>
-      <Box display="flex" border="1px"
-        borderRadius="lg"
-        borderColor="blue.300"
-        w="100%"
-        h="auto">
+      <Box m="2" border="1px" borderRadius="lg" w="sm" borderColor="blue.300">
+        <Box m="2" as="form">
+          <FormControl isRequired>
+            <FormLabel my="0" htmlFor="userProfil">User Profil</FormLabel>
+            <Select onChange={(event) => setUserProfil(event.target.value)} value={userProfil} placeholder="Select a Profil">
+              <option value="Sender">Sender</option>
+              <option value="Deliveryman">Deliveryman</option>
+            </Select>
+          </FormControl>
+        </Box>
+      </Box>
+      {userProfil && (
         <VStack >
-          <Box m="2" as="form">
-            <FormControl id="nftInfo" isRequired>
-              <FormLabel my="0" htmlFor="nftText">My Text</FormLabel>
-              <Textarea m="2" w="100%" h="135px" placeholder="My text here" onChange={(event) => setTextContent(event.target.value)} value={textContent} />
-            </FormControl>
-            <FormControl id="nftTitle" isRequired>
-              <FormLabel my="0" htmlFor="nftTitle">NFT Title</FormLabel>
-              <Input
-                m="2"
-                w="100%"
-                placeholder="Title "
-                onChange={(event) => setTextTitle(event.target.value)} value={textTitle} />
-            </FormControl>
-            <HStack align="end" justify="center">
-              <FormControl id="nftUrl" isRequired>
-                <FormLabel my="0" htmlFor="nftUrl">NFT Url</FormLabel>
+          <Box m="2" border="1px" borderRadius="lg" w="sm" borderColor="blue.300">
+            <Box m="2" as="form">
+              <FormControl isRequired>
+                <FormLabel my="0" htmlFor="firstName">{userProfil === "Sender" ? 'First name' : 'Manager first name'}</FormLabel>
                 <Input
-                  mx="2"
-                  w="480px"
-                  type="url"
-                  placeholder="http://...."
-                  onChange={(event) => setTextUrl(event.target.value)}
-                  value={textUrl}
-                />
+                  type="text"
+                  m="1"
+                  placeholder="First name"
+                  onChange={(event) => setFirstName(event.target.value)} value={firstName} />
               </FormControl>
-              <Button
-                isLoading={isLoading}
-                loadingText="Register"
-                colorScheme="blue"
-                onClick={handleClickRegister}
-                fontSize="13"
-                size="sm"
-              >
-                Register
-              </Button>
-            </HStack>
+              <FormControl isRequired>
+                <FormLabel my="0" htmlFor="lastName">{userProfil === "Sender" ? 'Last name' : 'Manager last name'}</FormLabel>
+                <Input
+                  type="text"
+                  m="1"
+                  placeholder="Last name"
+                  onChange={(event) => setLastName(event.target.value)} value={lastName} />
+              </FormControl>
+              <FormControl isRequired>
+                <FormLabel my="0" htmlFor="address">{userProfil === "Sender" ? 'Address' : 'Company address'}</FormLabel>
+                <Input type="text" list="suggestionList" onChange={handleChange} autoComplete="off" placeholder="An address in Paris" value={userAddress.toLowerCase()} />
+                {userAddress && !isAdress && <List as="ul" fontSize="12px" onClick={handleClickResult} p="2" spacing="1" bg="gray.200" border="1px" borderColor="gray.300" borderRadius="md">
+                  {loading && (<ListItem>loading...</ListItem>)}
+                  {!searchResults.length && !loading && (<ListItem>No result.</ListItem>)}
+                  {searchResults.length && (
+                    searchResults.map((result) => {
+                      return (
+                        <ListItem key={result.id} _hover={{
+                          background: "white",
+                          fontSize: "15px",
+                        }}>{result.adresse} </ListItem>
+                      )
+                    }
+                    )
+                  )
+                  }
+                </List>
+                }
+              </FormControl>
+              {userProfil !== "Sender" && (<FormControl isRequired>
+                <FormLabel my="1" htmlFor="companySirenNumber">Company Siren Number</FormLabel>
+                <Input
+                  type="text"
+                  m="1"
+                  placeholder="Siren number"
+                  onChange={(event) => setCompanySiren(event.target.value)} value={companySiren} />
+              </FormControl>)
+              }
+              <FormControl isRequired>
+                <FormLabel my="1" htmlFor="addressInfo">Address info</FormLabel>
+                <Input
+                  type="text"
+                  m="1"
+                  placeholder="Floor, code ..."
+                  onChange={(event) => setAddressInfo(event.target.value)} value={addressInfo} />
+              </FormControl>
+              <FormControl isRequired>
+                <FormLabel my="1" htmlFor="Telephone">Telephone</FormLabel>
+                <Input
+                  type="tel"
+                  m="1"
+                  placeholder="Your phone number"
+                  onChange={(event) => setTel(event.target.value)} value={tel} />
+              </FormControl>
+              <HStack align="end" justify="center">
+                <FormControl isRequired>
+                  <FormLabel my="1" htmlFor="mail">Mail</FormLabel>
+                  <Input
+                    px="2"
+                    type="mail"
+                    placeholder="bob@mail.com"
+                    onChange={(event) => setMail(event.target.value)}
+                    value={mail}
+                  />
+                </FormControl>
+                <Button
+                  type="submit"
+                  isLoading={isLoading}
+                  loadingText="Register"
+                  colorScheme="blue"
+                  onClick={handleClickRegister}
+                  fontSize="13"
+                  size="sm"
+                >
+                  Register
+                </Button>
+              </HStack>
+            </Box>
           </Box>
         </VStack>
-      </Box>
+      )
+      }
       <VStack spacing="0" borderRadius="lg" borderColor="dark" bg="red.400" w="600px" color="white" mt="2">
       </VStack>
-    </Flex>
+    </Flex >
   )
 }
 

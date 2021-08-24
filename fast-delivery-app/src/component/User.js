@@ -8,16 +8,16 @@ import {
 } from '@chakra-ui/react'
 
 import { Web3Context } from 'web3-hooks'
-import { SmartWordsContext } from '../App'
+// import { SmartWordsContext } from '../App'
 
 function User(props) {
   const { nftTokenBalance, setNftTokenBalance } = props
   const [web3State] = useContext(Web3Context)
-  const smartWords = useContext(SmartWordsContext)
+  // const smartWords = useContext(SmartWordsContext)
   // eslint-disable-next-line no-unused-vars
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
+  /* useEffect(() => {
     // si simpleStorage est pas null alors
     if (smartWords) {
       const GetNftBalanceOf = async () => {
@@ -45,8 +45,7 @@ function User(props) {
       }
     }
   }, [setNftTokenBalance, smartWords, web3State.account])
-
-
+  */
 
   return (
     <VStack py="1" align="center">

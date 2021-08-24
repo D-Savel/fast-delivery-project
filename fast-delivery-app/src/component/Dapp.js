@@ -1,6 +1,5 @@
 import Header from './Header'
 import Footer from './Footer'
-import MyNftList from './MyNftList'
 import CreateUser from './CreateUser'
 import { useContext, useState } from 'react'
 import { Web3Context } from 'web3-hooks'
@@ -16,7 +15,7 @@ import {
 
 function Dapp() {
   const [web3State] = useContext(Web3Context)
-  const [nftTokenBalance, setNftTokenBalance] = useState(0)
+  const [nftTokenBalance, setNftTokenBalance] = useState(99999999999)
 
   return (
     <>
@@ -38,8 +37,8 @@ function Dapp() {
               <Switch>
                 <Route exact path='/' component={CreateUser} />
                 <Route
-                  path='/MyNftList'
-                  component={() => <MyNftList nftTokenBalance={nftTokenBalance} setNftTokenBalance={setNftTokenBalance} />}
+                  path='/'
+                  component={() => <CreateUser nftTokenBalance={nftTokenBalance} setNftTokenBalance={setNftTokenBalance} />}
 
                 />
               </Switch>
