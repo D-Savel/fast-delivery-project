@@ -1,25 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react'
+import Dapp from './component/Dapp'
+import { useContract } from 'web3-hooks'
+import { DaidTokenAddress, DaidTokenAbi } from './contracts/DaidToken'
+import { FaucetAddress, FaucetAbi } from './contracts/Faucet'
+import { IcoAddress, IcoAbi } from './contracts/Ico'
+import { FastDeliveryNftAddress, FastDeliveryNftAbi } from './contracts/FastDeliveryNft'
+import { FastDeliveryUserAddress, FastDeliveryUserAbi } from './contracts/FastDeliveryUser'
+
+
+
+export const DaidTokenContext = React.createContext(null)
+export const FaucetContext = React.createContext(null)
+export const IcoContext = React.createContext(null)
+export const FastDeliveryNftContext = React.createContext(null)
+export const FastDeliveryUserContext = React.createContext(null)
+
 
 function App() {
+  const daidToken = useContract(DaidTokenAddress, DaidTokenAbi)
+  const faucet = useContract(FaucetAddress, FaucetAbi)
+  const ico = useContract(IcoAddress, IcoAbi)
+  const fastDeliveryNft = useContract(FastDeliveryNftAddress, FastDeliveryNftAbi)
+  const fastDeliveryUser = useContract(FastDeliveryUserAddress, FastDeliveryUserAbi)
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <>
+      <DaidTokenContext.Provider value={daidToken}>
+        <FaucetContext.Provider value={faucet}>
+          <IcoContext.Provider value={ico}>
+            <FastDeliveryNftContext.Provider value={fastDeliveryNft}>
+              <FastDeliveryUserContext.Provider value={fastDeliveryUser}>
+                <Dapp />
+              </FastDeliveryUserContext.Provider>
+            </FastDeliveryNftContext.Provider>
+          </IcoContext.Provider>
+        </FaucetContext.Provider>
+      </DaidTokenContext.Provider>
+
+    </>
+  )
 }
 
 export default App;

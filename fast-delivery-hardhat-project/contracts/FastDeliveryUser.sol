@@ -3,15 +3,7 @@
 pragma solidity ^0.8.0;
 
 contract FastDeliveryUser {
-    enum UserType {
-        parcelSender,
-        deliveryman
-    }
-
-    UserType public userType;
-
     struct User {
-        UserType userType;
         address parcelSender;
         address deliveryman;
         string firstName;
@@ -40,7 +32,6 @@ contract FastDeliveryUser {
         string memory mail_
     ) public returns (bool) {
         _users[msg.sender] = User({
-            userType: UserType.parcelSender,
             parcelSender: msg.sender,
             deliveryman: 0x0000000000000000000000000000000000000000,
             firstName: firstName_,
@@ -67,7 +58,6 @@ contract FastDeliveryUser {
         string memory mail_
     ) public returns (bool) {
         _users[msg.sender] = User({
-            userType: UserType.deliveryman,
             parcelSender: 0x0000000000000000000000000000000000000000,
             deliveryman: msg.sender,
             firstName: firstName_,
@@ -88,7 +78,11 @@ contract FastDeliveryUser {
         return _users[userAddress_];
     }
 
-    function getUserType(address userAddress_) public view returns (UserType) {
-        return _users[userAddress_].userType;
+    function getUserType(address userAddress_) public view returns (string memory) {
+        if (_users[userAddress_].parcelSender == 0x0000000000000000000000000000000000000000) {
+            return "Deliveryman";
+        } else {
+            return "Parcel Sender";
+        }
     }
 }
