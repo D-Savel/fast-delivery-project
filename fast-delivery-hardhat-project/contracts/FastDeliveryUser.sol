@@ -83,4 +83,12 @@ contract FastDeliveryUser {
         });
         return true;
     }
+
+    function getUserInfo(address userAddress_) public view returns (User memory) {
+        return _users[userAddress_];
+    }
+
+    function getUserType(address userAddress_) public view returns (UserType) {
+        return _users[userAddress_].userType;
+    }
 }

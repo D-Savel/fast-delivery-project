@@ -134,6 +134,8 @@ contract FastDeliveryNft is ERC721 {
                 index = i;
             }
         }
+        _daidToken.transferFrom(address(this), msg.sender, _deliveries[deliveryId_].deliveryAmount);
+        _userDeliveriesAmountBalance[msg.sender] -= _deliveries[deliveryId_].deliveryAmount;
         delete _userDeliveriesId[msg.sender][index];
         _deliveries[deliveryId_].status = Status.deleted;
         _burn(deliveryId_);
@@ -208,6 +210,8 @@ contract FastDeliveryNft is ERC721 {
             _deliveries[deliveryId_].status == Status.inDelivery,
             "FastDeliveryNft: to be delivered, the delivery status must be in delivery"
         );
+        _daidToken.transferFrom(address(this), msg.sender, _deliveries[deliveryId_].deliveryAmount);
+        _userDeliveriesAmountBalance[msg.sender] -= _deliveries[deliveryId_].deliveryAmount;
         _burn(deliveryId_);
         _deliveries[deliveryId_].status = Status.delivered;
         _deliveries[deliveryId_].deliveredTimestamp = block.timestamp;
