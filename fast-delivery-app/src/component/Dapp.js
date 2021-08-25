@@ -15,7 +15,8 @@ import {
 
 function Dapp() {
   const [web3State] = useContext(Web3Context)
-  const [nftTokenBalance, setNftTokenBalance] = useState(99999999999)
+  const [tokenBalance, setTokenBalance] = useState()
+  const [deliveryBalance, setDeliveryBalance] = useState()
 
   return (
     <>
@@ -25,7 +26,7 @@ function Dapp() {
             <Link as={ReachLink} to={'/'} ml="2" px="5"> CreateUser </Link>
             <Link as={ReachLink} to={'/MyNftList'} px="5">My NFT List</Link>
           </HStack>
-          <Header nftTokenBalance={nftTokenBalance} setNftTokenBalance={setNftTokenBalance} />
+          <Header tokenBalance={tokenBalance} setTokenBalance={setTokenBalance} deliveryBalance={deliveryBalance} setDeliveryBalance={setDeliveryBalance} />
         </Box>
         <VStack>
           {!web3State.isLogged ?
