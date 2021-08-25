@@ -18,19 +18,21 @@ import {
 
 import axios from 'axios'
 import { FastDeliveryUserContext } from '../App'
+import { Web3Context } from 'web3-hooks'
 
 function CreateUser() {
-
+  const [web3State] = useContext(Web3Context)
   const [loading, setLoading] = useState(false);
-  const [userAddress, setUserAddress] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [isAdress, setisAdress] = useState(true);
+  const [isAdress, setIsAddress] = useState(true);
+  const [isRegistered, setIsRegistered] = useState(false);
 
   const fastDeliveryUser = useContext(FastDeliveryUserContext)
   const [isLoading, setIsLoading] = useState(false)
-  const [userProfil, setUserProfil] = useState('')
-  const [firstName, setFirstName] = useState('')
+  const [userProfil, setUserProfil] = useState('Choose your profil')
+  const [firstName, setFirstName] = useState()
   const [lastName, setLastName] = useState('')
+  const [userAddress, setUserAddress] = useState('');
   const [addressX, setaddressX] = useState('')
   const [addressY, setaddressY] = useState('')
   const [companySiren, setCompanySiren] = useState('')
@@ -53,7 +55,7 @@ function CreateUser() {
         let response = await axios.get(url)
         setSearchResults(response.data)
         if (response.data.length) {
-          userAddress.toUpperCase().trim().localeCompare(response.data[0].adresse.trim()) === 0 ? setisAdress(true) : setisAdress(false)
+          userAddress.toUpperCase().trim().localeCompare(response.data[0].adresse.trim()) === 0 ? setIsAddress(true) : setIsAddress(false)
           setaddressX(response.data[0].x.toString())
           setaddressY(response.data[0].y.toString())
         }
@@ -108,11 +110,47 @@ function CreateUser() {
       })
     }
   }
+
+  useEffect(() => {
+    if (fastDeliveryUser) {
+      const getUserInfo = async () => {
+        try {
+          const userInfo = await fastDeliveryUser.getUserInfo(web3State.account)
+          if (userInfo[0] !== "0x0000000000000000000000000000000000000000") {
+            setUserProfil("Sender")
+            setIsRegistered(true)
+          }
+          if (userInfo[1] !== "0x0000000000000000000000000000000000000000") {
+            setUserProfil("Deliveryman")
+            setIsRegistered(true)
+          }
+          if (userInfo[0] === "0x0000000000000000000000000000000000000000" && userInfo[1] === "0x0000000000000000000000000000000000000000") {
+            setUserProfil("")
+            setIsRegistered(false)
+          }
+          setFirstName(userInfo[2])
+          setLastName(userInfo[3])
+          setCompanySiren(userInfo[6])
+          setAddressInfo(userInfo[7])
+          setTel(userInfo[8])
+          setMail(userInfo[9])
+        } catch (e) {
+          console.log(e)
+        }
+      }
+      getUserInfo()
+    }
+  }, [fastDeliveryUser, web3State.account])
+
+
   return (
 
     <Flex direction="column" align="center" justify="center" pb="8" m="1">
-      <Center borderColor="dark" w="420px" color="blue" p="1">
+      <Center w="420px" color="blue" p="1">
         <Heading size="xl">Fast Delivery register</Heading>
+      </Center>
+      <Center w="420px" p="1">
+        <Heading size="sm">{userProfil && ('You are already registered with this profil !')}</Heading>
       </Center>
       <Box m="2" border="1px" borderRadius="lg" w="sm" bg="blue.500" borderColor="blue.300">
         <Box m="2" as="form">
@@ -123,7 +161,8 @@ function CreateUser() {
               borderRadius="lg"
               bg="light"
               onChange={(event) => setUserProfil(event.target.value)}
-              value={userProfil} placeholder="Select a Profil">
+              value={userProfil}
+              placeholder="Select your profil">
               <option value="Sender">Sender</option>
               <option value="Deliveryman">Deliveryman</option>
             </Select>
@@ -212,7 +251,7 @@ function CreateUser() {
                   bg="light"
                   type="text"
                   placeholder="Floor, code ..."
-                  autocomplete="off"
+                  autoComplete="off"
                   onChange={(event) => setAddressInfo(event.target.value)}
                   value={addressInfo} />
               </FormControl>
@@ -251,10 +290,9 @@ function CreateUser() {
               borderRadius="lg"
               type="submit"
               isLoading={isLoading}
-              loadingText="Register"
               colorScheme="blue"
               onClick={handleClickRegister} >
-              Register
+              {isRegistered ? 'Update' : 'Register'}
             </Button>
           </Box>
         </VStack>

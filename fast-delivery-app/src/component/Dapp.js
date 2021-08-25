@@ -23,7 +23,7 @@ function Dapp() {
       <Router>
         <Box position="sticky" w="100%" top="0" zIndex="sticky">
           <HStack as="nav" bg="gray.300" py="1">
-            <Link as={ReachLink} to={'/'} ml="2" px="5"> CreateUser </Link>
+            <Link as={ReachLink} to={'/'} ml="2" px="5"> My account </Link>
             <Link as={ReachLink} to={'/MyNftList'} px="5">My NFT List</Link>
           </HStack>
           <Header tokenBalance={tokenBalance} setTokenBalance={setTokenBalance} deliveryBalance={deliveryBalance} setDeliveryBalance={setDeliveryBalance} />
@@ -39,7 +39,7 @@ function Dapp() {
                 <Route exact path='/' component={CreateUser} />
                 <Route
                   path='/'
-                  component={() => <CreateUser nftTokenBalance={nftTokenBalance} setNftTokenBalance={setNftTokenBalance} />}
+                  component={() => <CreateUser tokenBalance={tokenBalance} setTokenBalance={setTokenBalance} />}
 
                 />
               </Switch>
