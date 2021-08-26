@@ -14,6 +14,7 @@ import {
   VStack,
   Select,
   useToast,
+  Text
 } from '@chakra-ui/react'
 
 import axios from 'axios'
@@ -76,21 +77,22 @@ function CreateUser() {
         setIsLoading(true)
         let tx
         userProfil === "Sender" ?
-          tx = await fastDeliveryUser.parcelSenderRegister(firstName, lastName, addressX, addressY, addressInfo, tel, mail) :
-          tx = await fastDeliveryUser.deliverymanRegister(firstName, lastName, addressX, addressY, companySiren, addressInfo, tel, mail)
+          tx = await fastDeliveryUser.parcelSenderRegister(firstName, lastName, userAddress, addressX, addressY, addressInfo, tel, mail) :
+          tx = await fastDeliveryUser.deliverymanRegister(firstName, lastName, userAddress, addressX, addressY, companySiren, addressInfo, tel, mail)
         console.log(tx)
         await tx.wait()
         toast({
-          title: 'Confirmed transaction',
-          description: `You have been registered \nTransaction hash: ${tx.hash}`,
+          title: 'Confirmed transaction : You have been registered',
+          description: `Transaction hash: ${tx.hash}`,
           status: 'success',
           duration: 5000,
           isClosable: true,
         })
       } catch (e) {
         if (e.code) {
+          console.log(e.message)
           toast({
-            title: 'Transaction signature denied',
+            title: 'Transaction denied',
             description: e.message,
             status: 'error',
             duration: 9000,
@@ -130,15 +132,17 @@ function CreateUser() {
           }
           setFirstName(userInfo[2])
           setLastName(userInfo[3])
-          setCompanySiren(userInfo[6])
-          setAddressInfo(userInfo[7])
-          setTel(userInfo[8])
-          setMail(userInfo[9])
+          setUserAddress(userInfo[4])
+          setCompanySiren(userInfo[7])
+          setAddressInfo(userInfo[8])
+          setTel(userInfo[9])
+          setMail(userInfo[10])
         } catch (e) {
           console.log(e)
         }
       }
       getUserInfo()
+
     }
   }, [fastDeliveryUser, web3State.account])
 

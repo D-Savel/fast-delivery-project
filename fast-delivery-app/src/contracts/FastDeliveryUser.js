@@ -1,4 +1,4 @@
-export const FastDeliveryUserAddress = '0x882ee9ef66104F8e71EfF51c8E993015b6E56D84'
+export const FastDeliveryUserAddress = '0x810aBb21901a75aB173E57fF9Cf1222bb8bd0B2C'
 
 export const FastDeliveryUserAbi = [
   {
@@ -16,6 +16,11 @@ export const FastDeliveryUserAbi = [
       {
         "internalType": "string",
         "name": "lastName_",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "addressDeliveryman_",
         "type": "string"
       },
       {
@@ -94,6 +99,11 @@ export const FastDeliveryUserAbi = [
           },
           {
             "internalType": "string",
+            "name": "userAddress",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
             "name": "addressX",
             "type": "string"
           },
@@ -165,6 +175,11 @@ export const FastDeliveryUserAbi = [
       {
         "internalType": "string",
         "name": "lastName_",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "addressParcelSender_",
         "type": "string"
       },
       {

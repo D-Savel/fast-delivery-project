@@ -2,17 +2,19 @@ import { useContext } from 'react'
 import { Web3Context } from 'web3-hooks'
 import {
 
-  Heading, Box,
+  Text,
+  Box,
   Button,
   Stack,
-  VStack
+  VStack,
+  Flex
 } from '@chakra-ui/react'
 
 import MetaMaskParameters from './MetaMaskParameters'
 import User from './User'
 
 function Header(props) {
-  const { nftTokenBalance, setNftTokenBalance } = props
+  const { tokenBalance, setTokenBalance, deliveryBalance, setDeliveryBalance } = props
   const [web3State, login] = useContext(Web3Context);
 
   return (
@@ -20,19 +22,18 @@ function Header(props) {
       <Stack
         direction={["column", "column", "row"]}
         sx={{
-          gap: "1rem",
+          gap: "0rem",
         }}
         align="center"
         justify="space-between"
       >
         < MetaMaskParameters />
-        <VStack py="1">
-          <Heading align="center" as="h1" color="white">FastDelivery</Heading>
-          <Heading align="center" as="h1" color="white">App</Heading>
-          {!web3State.isLogged && (<Button colorScheme="orange" onClick={login}>login MetaMask
-          </Button>)}
-        </VStack>
-        <User web3Id={web3State.chainId} nftTokenBalance={nftTokenBalance} setNftTokenBalance={setNftTokenBalance} />
+        <Flex direction="column">
+          <Text align="center" fontSize="3xl" color="white" > Fast</Text>
+          <Text align="center" fontSize="3xl" color="white" > Delivery</Text>
+          <Text align="center" fontSize="3xl" color="white" >App</Text>
+        </Flex>
+        <User web3Id={web3State.chainId} tokenBalance={tokenBalance} setTokenBalance={setTokenBalance} deliveryBalance={deliveryBalance} setDeliveryBalance={setDeliveryBalance} />
       </Stack>
     </Box>
   )
