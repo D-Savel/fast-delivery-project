@@ -32,11 +32,17 @@ contract Ico {
     event Bought(address indexed recipient, uint256 TokenAmount, uint256 etherAmount);
 
     /**
-     * @dev Event Withdrew for profit
-     * @param recipient : Address for Withdraw recipient (tokens owner)
-     * @param etherAmount : Amount of withdrawing profit in Ethers
+     * @dev Event withdraw profit
+     * @param recipient : Address of tokens buyer
+     * @param etherAmount : Profit Amount in Ethers
      */
     event Withdrew(address indexed recipient, uint256 etherAmount);
+
+    /**
+     * @dev Event change rate value
+     * @param newRate : new value for rate
+     */
+    event Ratechanged(uint256 newRate);
 
     /**
      * @dev Construtor intancies the tokens owner (seller) and link to ERC20 (DaidToken)
@@ -58,13 +64,12 @@ contract Ico {
      * for address different of tokens owner /
      * if ether amount for buying tokens is above 0 ether /
      * if number of tokens remaining is above the buyer demande /
-     * if ico delay is not over.
      * @dev buyTokens call transferFrom function from ERC20 DaidToken contract
      * it tranfers bought tokens from tokens owner to buyer
      */
     function buyTokens() public payable returns (bool) {
         require(msg.sender != _tokenOwner, "ICO: owner can not buy his tokens");
-        require(msg.value * _rate < tokensRemainingIco(), "ICO: not enough tokens remaining to sell");
+        require(msg.value * _rate < _daidToken.balanceOf(_tokenOwner), "ICO: not enough tokens remaining to sell");
         uint256 tokenAmount = msg.value * _rate;
         _daidToken.transferFrom(_tokenOwner, msg.sender, tokenAmount);
         emit Bought(msg.sender, tokenAmount, msg.value);
@@ -82,6 +87,12 @@ contract Ico {
         uint256 icoEtherAmount = address(this).balance;
         payable(msg.sender).sendValue(icoEtherAmount);
         emit Withdrew(msg.sender, icoEtherAmount);
+    }
+
+    function changeRate(uint256 newRate) public {
+        require(msg.sender == _tokenOwner, "ICO: Only tokens owner can change rate");
+        _rate = newRate;
+        emit Ratechanged(newRate);
     }
 
     /**
@@ -103,14 +114,6 @@ contract Ico {
         return _daidToken.balanceOf(account_);
     }
 
-    /**
-     * @return Amount of tokens remaining for ico.
-     * @dev function balanceOf called from ERC20 DaidToken contract
-     */
-    function tokensRemainingIco() public view returns (uint256) {
-        return _daidToken.balanceOf(_tokenOwner);
-    }
-
     /// @return Current balance of Ethers of the ico offer profit.
     function profit() public view returns (uint256) {
         return address(this).balance;
@@ -124,5 +127,10 @@ contract Ico {
     /// @return Tokens owner Address.
     function tokenOwner() public view returns (address) {
         return _tokenOwner;
+    }
+
+    /// @return Rate for Ether to DAID Tokens.
+    function rate() public view returns (uint256) {
+        return _rate;
     }
 }
