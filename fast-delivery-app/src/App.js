@@ -23,20 +23,17 @@ function App() {
   const fastDeliveryNft = useContract(FastDeliveryNftAddress, FastDeliveryNftAbi)
   const fastDeliveryUser = useContract(FastDeliveryUserAddress, FastDeliveryUserAbi)
   return (
-    <>
+    <FastDeliveryUserContext.Provider value={fastDeliveryUser}>
       <DaidTokenContext.Provider value={daidToken}>
         <FaucetContext.Provider value={faucet}>
           <IcoContext.Provider value={ico}>
             <FastDeliveryNftContext.Provider value={fastDeliveryNft}>
-              <FastDeliveryUserContext.Provider value={fastDeliveryUser}>
-                <Dapp />
-              </FastDeliveryUserContext.Provider>
+              <Dapp />
             </FastDeliveryNftContext.Provider>
           </IcoContext.Provider>
         </FaucetContext.Provider>
       </DaidTokenContext.Provider>
-
-    </>
+    </FastDeliveryUserContext.Provider>
   )
 }
 

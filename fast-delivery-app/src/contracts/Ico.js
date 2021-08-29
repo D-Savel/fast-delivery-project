@@ -1,4 +1,4 @@
-export const IcoAddress = '0x341DBeFc2C73466E6770e50bf4b51D357778e70F'
+export const IcoAddress = '0x61b86f4874dee5860e1299557b221846f22415D7'
 
 export const IcoAbi = [
   {
@@ -41,19 +41,13 @@ export const IcoAbi = [
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "recipient",
-        "type": "address"
-      },
-      {
         "indexed": false,
         "internalType": "uint256",
-        "name": "etherAmount",
+        "name": "newRate",
         "type": "uint256"
       }
     ],
-    "name": "Withdrew",
+    "name": "Ratechanged",
     "type": "event"
   },
   {
@@ -89,8 +83,34 @@ export const IcoAbi = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "newRate",
+        "type": "uint256"
+      }
+    ],
+    "name": "changeRate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "profit",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "rate",
     "outputs": [
       {
         "internalType": "uint256",
@@ -144,26 +164,6 @@ export const IcoAbi = [
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "tokensRemainingIco",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "withdrawProfit",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

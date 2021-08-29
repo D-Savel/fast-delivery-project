@@ -8,9 +8,9 @@ contract FastDeliveryUser {
         address deliveryman;
         string firstName;
         string lastName;
-        string addressXParcelSender;
-        string addressYParcelSender;
-        string companyAddress;
+        string userAddress;
+        string addressX;
+        string addressY;
         string companySiren;
         string addressInfo;
         string tel;
@@ -25,6 +25,7 @@ contract FastDeliveryUser {
     function parcelSenderRegister(
         string memory firstName_,
         string memory lastName_,
+        string memory addressParcelSender_,
         string memory addressXParcelSender_,
         string memory addressYParcelSender_,
         string memory addressInfo_,
@@ -36,9 +37,9 @@ contract FastDeliveryUser {
             deliveryman: 0x0000000000000000000000000000000000000000,
             firstName: firstName_,
             lastName: lastName_,
-            addressXParcelSender: addressXParcelSender_,
-            addressYParcelSender: addressYParcelSender_,
-            companyAddress: "0",
+            userAddress: addressParcelSender_,
+            addressX: addressXParcelSender_,
+            addressY: addressYParcelSender_,
             companySiren: "0",
             addressInfo: addressInfo_,
             tel: tel_,
@@ -51,7 +52,9 @@ contract FastDeliveryUser {
     function deliverymanRegister(
         string memory firstName_,
         string memory lastName_,
-        string memory companyAddress_,
+        string memory addressDeliveryman_,
+        string memory addressXDeliveryman_,
+        string memory addressYDeliveryman_,
         string memory companySiren_,
         string memory addressInfo_,
         string memory tel_,
@@ -62,9 +65,9 @@ contract FastDeliveryUser {
             deliveryman: msg.sender,
             firstName: firstName_,
             lastName: lastName_,
-            addressXParcelSender: "0",
-            addressYParcelSender: "0",
-            companyAddress: companyAddress_,
+            userAddress: addressDeliveryman_,
+            addressX: addressXDeliveryman_,
+            addressY: addressYDeliveryman_,
             companySiren: companySiren_,
             addressInfo: addressInfo_,
             tel: tel_,
