@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/Address.sol";
 import "./DaidToken.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 
 /**
  * @title Ico contract
@@ -19,9 +19,13 @@ contract Ico {
     /// @dev ERC20 contract choose for Daid tokens ICO
     DaidToken private _daidToken;
 
+    /// @dev DAID token contract address
     address private _tokenContractAddress;
+
+    // The price of 1 unit of our token in wei;
+    uint256 private _price = 4 * 1e14; // 1 DAID = 4* 1E14 wei
+
     address private _tokenOwner;
-    uint256 private _rate = 3000; // 1 ETHER = 3000 DAID Tokens
 
     /**
      * @dev Event Bought for buying tokens
@@ -32,17 +36,17 @@ contract Ico {
     event Bought(address indexed recipient, uint256 TokenAmount, uint256 etherAmount);
 
     /**
-     * @dev Event withdraw profit
-     * @param recipient : Address of tokens buyer
-     * @param etherAmount : Profit Amount in Ethers
+     * @dev Event Withdrew for profit
+     * @param recipient : Address for Withdraw recipient (tokens owner)
+     * @param etherAmount : Amount of withdrawing profit in Ethers
      */
     event Withdrew(address indexed recipient, uint256 etherAmount);
 
     /**
      * @dev Event change rate value
-     * @param newRate : new value for rate
+     * @param newPrice : new value for rate
      */
-    event Ratechanged(uint256 newRate);
+    event PriceChanged(uint256 newPrice);
 
     /**
      * @dev Construtor intancies the tokens owner (seller) and link to ERC20 (DaidToken)
@@ -57,7 +61,7 @@ contract Ico {
 
     /// @dev ICO smart contract use buyTokens() function for external payable function
     receive() external payable {
-        buyTokens();
+        buyTokens(msg.value / _price);
     }
 
     /** @notice Public payable function to buy tokens, this function is callable only :
@@ -67,12 +71,17 @@ contract Ico {
      * @dev buyTokens call transferFrom function from ERC20 DaidToken contract
      * it tranfers bought tokens from tokens owner to buyer
      */
-    function buyTokens() public payable returns (bool) {
+    function buyTokens(uint256 nbTokens_) public payable returns (bool) {
+        require(msg.value >= 0, "ICO: Price is not 0 ether");
         require(msg.sender != _tokenOwner, "ICO: owner can not buy his tokens");
-        require(msg.value * _rate < _daidToken.balanceOf(_tokenOwner), "ICO: not enough tokens remaining to sell");
-        uint256 tokenAmount = msg.value * _rate;
-        _daidToken.transferFrom(_tokenOwner, msg.sender, tokenAmount);
-        emit Bought(msg.sender, tokenAmount, msg.value);
+        require(nbTokens_ * _price < msg.value, "ICO: not enough Ether to purchase");
+        uint256 _realPrice = nbTokens_ * _price;
+        uint256 _remaining = msg.value - _realPrice;
+        _daidToken.transferFrom(_tokenOwner, msg.sender, nbTokens_);
+        if (_remaining > 0) {
+            payable(msg.sender).sendValue(_remaining);
+        }
+        emit Bought(msg.sender, nbTokens_, _realPrice);
         return true;
     }
 
@@ -89,10 +98,10 @@ contract Ico {
         emit Withdrew(msg.sender, icoEtherAmount);
     }
 
-    function changeRate(uint256 newRate) public {
+    function changePrice(uint256 newPrice_) public {
         require(msg.sender == _tokenOwner, "ICO: Only tokens owner can change rate");
-        _rate = newRate;
-        emit Ratechanged(newRate);
+        _price = newPrice_;
+        emit PriceChanged(newPrice_);
     }
 
     /**
@@ -114,11 +123,6 @@ contract Ico {
         return _daidToken.balanceOf(account_);
     }
 
-    /// @return Current balance of Ethers of the ico offer profit.
-    function profit() public view returns (uint256) {
-        return address(this).balance;
-    }
-
     /// @return ERC20 Token contract Address.
     function tokenContractAddress() public view returns (address) {
         return _tokenContractAddress;
@@ -129,8 +133,8 @@ contract Ico {
         return _tokenOwner;
     }
 
-    /// @return Rate for Ether to DAID Tokens.
-    function rate() public view returns (uint256) {
-        return _rate;
+    /// @return Price for 1 DAID Token to wei.
+    function price() public view returns (uint256) {
+        return _price;
     }
 }

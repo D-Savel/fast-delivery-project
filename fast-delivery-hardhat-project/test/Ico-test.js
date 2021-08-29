@@ -3,8 +3,8 @@ const { expect } = require('chai');
 
 describe('Ico', function () {
   let DaidToken, daidToken, Ico, ico, dev, tokenOwnerTest, icoOwner, alice, bob;
-  const INITIAL_SUPPLY = ethers.utils.parseEther('1000');
-  const RATE = 3000;
+  const INITIAL_SUPPLY = ethers.utils.parseEther('1000000000000000');
+  const PRICE = 4 * 1e14;
 
   beforeEach(async function () {
     // daidToken deployment
@@ -35,68 +35,38 @@ describe('Ico', function () {
     });
     describe('buyTokens', function () {
       it('should tokens buyer balance increase bought tokens amount', async function () {
-        await ico.connect(alice).buyTokens({ value: 1000 });
+        await ico.connect(alice).buyTokens(1000 / PRICE, { value: ethers.utils.parseEther('0.1') });
         expect(await ico.tokensBalanceOf(alice.address)).to.equal(1000 * RATE);
       });
       it('should tokens owner balance decrease bought tokens amount', async function () {
         const currentTokenOwnerBalance = await ico.tokensBalanceOf(tokenOwnerTest.address);
-        await ico.connect(alice).buyTokens({ value: 1000 });
+        await ico.connect(alice).buyTokens(1000 * PRICE, { value: 1000 });
         expect(await ico.tokensBalanceOf(tokenOwnerTest.address)).to.equal(currentTokenOwnerBalance.sub(1000 * RATE));
       });
-      it('should profit balance increase ether amount of tokens buyer', async function () {
-        await ico.connect(bob).buyTokens({ value: 10000 });
-        expect(await ico.profit()).to.equal(10000);
-      });
-      it('should Ether balance buyer decrease of 10000 after tokens buying', async function () {
-        expect(await ico.connect(alice).buyTokens({ value: 10000 })).to.changeEtherBalance(alice, -10000);
+      it('should tokenOwner balance increase and buyer balance decrease Ether amount of tokens', async function () {
+        expect(await ico.connect(bob).buyTokens(1000 * PRICE, { value: ethers.utils.parseEther('0.1') })).to.changeEtherBalance(ico, 10000);;
+        expect(await ico.connect(bob).buyTokens(1000 * PRICE, { value: ethers.utils.parseEther('0.1') })).to.changeEtherBalance(bob, -10000);
       });
       it('should revert for tokenOwner', async function () {
-        await expect(ico.connect(tokenOwnerTest).buyTokens({ value: 200 }))
+        await expect(ico.connect(tokenOwnerTest).buyTokens(1000 * PRICE, { value: ethers.utils.parseEther('0.1') }))
           .to.be.revertedWith('ICO: owner can not buy his tokens');
       });
       it('should revert in case of insuffisant tokens remaining to sell', async function () {
         const currentTokenOwnerBalance = await ico.tokensBalanceOf(tokenOwnerTest.address);
-        await expect(ico.connect(bob).buyTokens({ value: currentTokenOwnerBalance.add(1000) }))
+        await expect(ico.connect(bob).buyTokens(1000 * PRICE, { value: currentTokenOwnerBalance.add(1000) }))
           .to.be.revertedWith('ICO: not enough tokens remaining to sell');
       });
       it('should emit Bought event', async function () {
-        expect(await ico.connect(bob).buyTokens({ value: 500 }))
+        expect(await ico.connect(bob).buyTokens(1000 * PRICE, { value: 500 }))
           .to.emit(ico, 'Bought').withArgs(bob.address, 500 * RATE, 500);
       });
     });
     describe('receive funtion', async function () {
-      it('should change Ether balance for tokens buyer and profit(ico address)', async function () {
-        expect(await alice.sendTransaction({ to: ico.address, value: 10000 })).to.changeEtherBalance(
-          ico, 10000);
-        expect(await alice.sendTransaction({ to: ico.address, value: 10000 })).to.changeEtherBalance(
+      it('should change Ether balance for tokens buyer and tokenOwnerTest', async function () {
+        expect(await alice.sendTransaction({ to: tokenOwnerTest.address, value: 10000 })).to.changeEtherBalance(
+          tokenOwnerTest, 10000);
+        expect(await alice.sendTransaction({ to: tokenOwnerTest.address, value: 10000 })).to.changeEtherBalance(
           alice, -10000);
-      });
-    });
-    describe('withdraw', function () {
-      it('should profit balance equal to 0 after withdraw', async function () {
-        await ico.connect(alice).buyTokens({ value: 10000 });
-        await ico.connect(bob).buyTokens({ value: 5000 });
-        await ico.connect(tokenOwnerTest).withdrawProfit();
-        expect(await ico.profit()).to.equal(0);
-      });
-      it('should Ether balance tokensowner equal to 15000 after withdraw', async function () {
-        await ico.connect(alice).buyTokens({ value: 10000 });
-        await ico.connect(bob).buyTokens({ value: 5000 });
-        expect(await ico.connect(tokenOwnerTest).withdrawProfit()).to.changeEtherBalance(tokenOwnerTest, 10000 + 5000);
-      });
-      it('should revert for profit balance equal to 0', async function () {
-        await expect(ico.connect(tokenOwnerTest).withdrawProfit())
-          .to.be.revertedWith('ICO: No profit to withdraw');
-      });
-      it('should revert for withdraw with address different of tokensOwner', async function () {
-        await expect(ico.connect(bob).withdrawProfit())
-          .to.be.revertedWith('ICO: Only tokens owner can withdraw profit');
-      });
-      it('should emit Withdrew event', async function () {
-        await ico.connect(alice).buyTokens({ value: 10000 });
-        await ico.connect(bob).buyTokens({ value: 5000 });
-        expect(await ico.connect(tokenOwnerTest).withdrawProfit())
-          .to.emit(ico, 'Withdrew').withArgs(tokenOwnerTest.address, 10000 + 5000);
       });
     });
   });
