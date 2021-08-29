@@ -14,7 +14,6 @@ import {
   VStack,
   Select,
   useToast,
-  Text
 } from '@chakra-ui/react'
 
 import axios from 'axios'
@@ -31,7 +30,7 @@ function CreateUser() {
   const fastDeliveryUser = useContext(FastDeliveryUserContext)
   const [isLoading, setIsLoading] = useState(false)
   const [userProfil, setUserProfil] = useState('Choose your profil')
-  const [firstName, setFirstName] = useState()
+  const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [userAddress, setUserAddress] = useState('');
   const [addressX, setaddressX] = useState('')
@@ -41,11 +40,6 @@ function CreateUser() {
   const [tel, setTel] = useState('')
   const [mail, setMail] = useState('')
   const toast = useToast()
-
-  const handleChange = (e) => setUserAddress(e.target.value)
-  const handleClickResult = (e) => {
-    setUserAddress(e.target.textContent)
-  }
 
   useEffect(() => {
     let url = `http://localhost:3333/address/?address=${userAddress}`
@@ -149,7 +143,7 @@ function CreateUser() {
 
   return (
 
-    <Flex direction="column" align="center" justify="center" pb="8" m="1">
+    <Flex direction="column" align="center" justify="center" pb="5" m="1">
       <Center w="420px" color="blue" p="1">
         <Heading size="xl">Fast Delivery register</Heading>
       </Center>
@@ -209,13 +203,21 @@ function CreateUser() {
                   bg="light"
                   type="text"
                   list="suggestionList"
-                  onChange={handleChange}
+                  onChange={(event) => setUserAddress(event.target.value)}
                   autoComplete="off"
                   placeholder="An address in Paris"
                   value={userAddress.toLowerCase()}
                   isInvalid={userAddress === "" || !isAdress ? true : false} />
                 {
-                  userAddress && !isAdress && <List as="ul" fontSize="12px" onClick={handleClickResult} p="2" spacing="1" bg="gray.200" border="1px" borderColor="gray.300" borderRadius="md">
+                  userAddress && !isAdress && <List as="ul"
+                    fontSize="12px"
+                    onClick={(event) => { setUserAddress(event.target.textContent) }}
+                    p="2"
+                    spacing="1"
+                    bg="gray.200"
+                    border="1px"
+                    borderColor="gray.300"
+                    borderRadius="md">
                     {loading && (<ListItem>loading...</ListItem>)}
                     {!searchResults.length && !loading && (<ListItem>No result.</ListItem>)}
                     {searchResults.length && (

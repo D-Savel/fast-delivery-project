@@ -1,7 +1,8 @@
 import Header from './Header'
 import Footer from './Footer'
 import LandingPage from './LandingPage'
-import { useContext, useState } from 'react'
+import GetTokens from './GetTokens'
+import { useContext, useEffect, useState } from 'react'
 import { Web3Context } from 'web3-hooks'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import { Link as ReachLink } from 'react-router-dom'
@@ -14,11 +15,42 @@ import {
   HStack,
 } from '@chakra-ui/react'
 import CreateUser from './CreateUser'
+import { DaidTokenContext } from '../App'
 
 function Dapp() {
   const [web3State, login] = useContext(Web3Context)
-  const [tokenBalance, setTokenBalance] = useState(9999999)
-  const [deliveryBalance, setDeliveryBalance] = useState(1111111)
+  const daidToken = useContext(DaidTokenContext)
+  const [isLoading, setIsLoading] = useState(false)
+  const [tokenBalance, setTokenBalance] = useState(0)
+  const [deliveryBalance, setDeliveryBalance] = useState(0)
+
+  useEffect(() => {
+    if (daidToken) {
+      const getTokenBalance = async () => {
+        try {
+          console.log('useEffect USER')
+          setIsLoading(true)
+          const getTokenBalance = await daidToken.balanceOf(web3State.account)
+          setTokenBalance(Number(getTokenBalance))
+        } catch (e) {
+          console.log(e)
+        } finally {
+          setIsLoading(false)
+        }
+      }
+      const cb = (from, to, tokenId) => {
+        getTokenBalance()
+      }
+      getTokenBalance()
+      const userFilter = daidToken.filters.Transfer(null, web3State.account)
+      // ecouter sur l'event DataSet avec le filter eveFilter appliqué
+      daidToken.on(userFilter, cb)
+      return () => {
+        // arreter d'ecouter lorsque le component sera unmount
+        daidToken.off(userFilter, cb)
+      }
+    }
+  }, [setTokenBalance, daidToken, web3State.account])
 
   return (
     <>
@@ -26,7 +58,8 @@ function Dapp() {
         <Box position="sticky" w="100%" top="0" zIndex="sticky">
           <HStack as="nav" bg="gray.300" py="1">
             <Link as={ReachLink} to={'/CreateUser'} ml="2" px="5"> My account </Link>
-            <Link as={ReachLink} to={'/LandingPage'} px="5">My NFT List</Link>
+            <Link as={ReachLink} to={'/LandingPage'} px="5">Landing Page</Link>
+            <Link as={ReachLink} to={'/GetTokens'} px="5">Get Token(s)</Link>
           </HStack>
           <Header tokenBalance={tokenBalance} setTokenBalance={setTokenBalance} deliveryBalance={deliveryBalance} setDeliveryBalance={setDeliveryBalance} />
         </Box>
@@ -39,11 +72,13 @@ function Dapp() {
             </> :
             <>
               <Switch>
-                <Route exact path='/' component={LandingPage} />
+                <Route exact path='/' component={CreateUser} />
                 <Route
-                  path='/'
+                  path='/LandingPage'
                   component={() => <LandingPage tokenBalance={tokenBalance} setTokenBalance={setTokenBalance} />} />
-                <Route path='/CreateUser' component={CreateUser} />
+                <Route path='/GetTokens' component={GetTokens} />
+                <Route path='/' component={CreateUser} />
+
               </Switch>
             </>
           }
