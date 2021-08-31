@@ -20,7 +20,8 @@ import axios from 'axios'
 import { FastDeliveryUserContext } from '../App'
 import { Web3Context } from 'web3-hooks'
 
-function CreateUser() {
+function CreateUser(props) {
+  const { userAddress, setUserAddress } = props
   const [web3State] = useContext(Web3Context)
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
@@ -32,7 +33,6 @@ function CreateUser() {
   const [userProfil, setUserProfil] = useState('Choose your profil')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [userAddress, setUserAddress] = useState('');
   const [addressX, setaddressX] = useState('')
   const [addressY, setaddressY] = useState('')
   const [companySiren, setCompanySiren] = useState('')
@@ -138,12 +138,12 @@ function CreateUser() {
       getUserInfo()
 
     }
-  }, [fastDeliveryUser, web3State.account])
+  }, [fastDeliveryUser, web3State.account, setUserAddress])
 
 
   return (
 
-    <Flex direction="column" align="center" justify="center" pb="5" m="1">
+    <Flex direction="column" align="center" justify="center" m="1">
       <Center w="420px" color="blue" p="1">
         <Heading size="xl">Fast Delivery register</Heading>
       </Center>

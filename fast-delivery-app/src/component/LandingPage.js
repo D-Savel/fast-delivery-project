@@ -1,7 +1,9 @@
+import CreateUser from './CreateUser'
 
-function LandingPage() {
+function LandingPage(props) {
+  const { userAddress, setUserAddress } = props
   return (
-    <p>Landing Page</p>
+    <CreateUser userAddress={userAddress} setUserAddress={setUserAddress} />
   )
 }
 
