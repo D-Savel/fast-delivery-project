@@ -46,8 +46,8 @@ function User() {
   return (
     <VStack py="1" align="end">
       <Box>
-        {web3State.provider ? <Badge borderRadius="lg" fontSize="14" mb="1" pr="1" pt="1" textTransform="capitalize" variant="solid" colorScheme="blue">{roundedBalance} Eth</Badge>
-          : <Badge borderRadius="lg" fontSize="14" mb="1" px="2" pt="1" textTransform="capitalize" variant="solid" colorScheme="red">{roundedBalance} Ether</Badge>}
+        {web3State.provider ? <Badge borderRadius="lg" fontSize="14" mb="1" pr="1" pt="1" variant="solid" colorScheme="blue">{roundedBalance} ETH</Badge>
+          : <Badge borderRadius="lg" fontSize="14" mb="1" px="2" pt="1" variant="solid" colorScheme="red">{roundedBalance} ETH</Badge>}
       </Box>
 
       <Box> {web3State.provider ? <Badge borderRadius="lg" fontSize="14" mb="1" pt="1" variant="solid" colorScheme="blue">{tokenBalance} DAID</Badge>
