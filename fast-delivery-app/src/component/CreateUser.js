@@ -26,11 +26,11 @@ function CreateUser(props) {
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [isAdress, setIsAddress] = useState(true);
-  const [isRegistered, setIsRegistered] = useState(false);
 
   const fastDeliveryUser = useContext(FastDeliveryUserContext)
   const [isLoading, setIsLoading] = useState(false)
   const [userProfil, setUserProfil] = useState('Choose your profil')
+  const [web3Address, setWeb3Address] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [addressX, setaddressX] = useState('')
@@ -69,10 +69,7 @@ function CreateUser(props) {
     if (firstName && lastName && addressX && addressY && tel && mail && isAdress) {
       try {
         setIsLoading(true)
-        let tx
-        userProfil === "Sender" ?
-          tx = await fastDeliveryUser.parcelSenderRegister(firstName, lastName, userAddress, addressX, addressY, addressInfo, tel, mail) :
-          tx = await fastDeliveryUser.deliverymanRegister(firstName, lastName, userAddress, addressX, addressY, companySiren, addressInfo, tel, mail)
+        let tx = await fastDeliveryUser.userRegister(userProfil, firstName, lastName, userAddress, addressX, addressY, companySiren, addressInfo, tel, mail)
         console.log(tx)
         await tx.wait()
         toast({
@@ -112,18 +109,15 @@ function CreateUser(props) {
       const getUserInfo = async () => {
         try {
           const userInfo = await fastDeliveryUser.getUserInfo(web3State.account)
-          if (userInfo[0] !== "0x0000000000000000000000000000000000000000") {
-            setUserProfil("Sender")
-            setIsRegistered(true)
-          }
-          if (userInfo[1] !== "0x0000000000000000000000000000000000000000") {
-            setUserProfil("Deliveryman")
-            setIsRegistered(true)
-          }
-          if (userInfo[0] === "0x0000000000000000000000000000000000000000" && userInfo[1] === "0x0000000000000000000000000000000000000000") {
+          console.log(userInfo, 'userInfo')
+          if (userInfo[1] === "0x0000000000000000000000000000000000000000") {
             setUserProfil("")
-            setIsRegistered(false)
+          } else if (userInfo[0] === 0) {
+            setUserProfil("parcelSender")
+          } else if (userInfo[0] === 1) {
+            setUserProfil("deliveryman")
           }
+          setWeb3Address(userInfo[1])
           setFirstName(userInfo[2])
           setLastName(userInfo[3])
           setUserAddress(userInfo[4])
@@ -161,8 +155,8 @@ function CreateUser(props) {
               onChange={(event) => setUserProfil(event.target.value)}
               value={userProfil}
               placeholder="Select your profil">
-              <option value="Sender">Sender</option>
-              <option value="Deliveryman">Deliveryman</option>
+              <option value="parcelSender">Sender</option>
+              <option value="deliveryman">Deliveryman</option>
             </Select>
           </FormControl>
         </Box>
@@ -172,7 +166,7 @@ function CreateUser(props) {
           <Box border="1px" borderRadius="lg" w="sm" bg="blue.500" borderColor="blue.300">
             <Box m="2" as="form">
               <FormControl isRequired>
-                <FormLabel my="0" htmlFor="firstName">{userProfil === "Sender" ? 'First name' : 'Manager first name'}</FormLabel>
+                <FormLabel my="0" htmlFor="firstName">{userProfil === "parcelSender" ? 'First name' : 'Manager first name'}</FormLabel>
                 <Input
                   size="sm"
                   borderRadius="lg"
@@ -184,7 +178,7 @@ function CreateUser(props) {
                   isInvalid={firstName === "" ? true : false} />
               </FormControl>
               <FormControl isRequired>
-                <FormLabel pt="1" my="0" htmlFor="lastName">{userProfil === "Sender" ? 'Last name' : 'Manager last name'}</FormLabel>
+                <FormLabel pt="1" my="0" htmlFor="lastName">{userProfil === "parcelSender" ? 'Last name' : 'Manager last name'}</FormLabel>
                 <Input
                   size="sm"
                   borderRadius="lg"
@@ -196,7 +190,7 @@ function CreateUser(props) {
                   isInvalid={lastName === "" ? true : false} />
               </FormControl>
               <FormControl isRequired>
-                <FormLabel pt="1" my="0" htmlFor="address">{userProfil === "Sender" ? 'Address' : 'Company address'}</FormLabel>
+                <FormLabel pt="1" my="0" htmlFor="address">{userProfil === "parcelSender" ? 'Address' : 'Company address'}</FormLabel>
                 <Input
                   size="sm"
                   borderRadius="lg"
@@ -235,7 +229,7 @@ function CreateUser(props) {
                   </List>
                 }
               </FormControl>
-              {userProfil !== "Sender" && (<FormControl isRequired>
+              {userProfil !== "parcelSender" && (<FormControl isRequired>
                 <FormLabel pt="0" my="1" htmlFor="companySirenNumber">Company Siren Number</FormLabel>
                 <Input
                   size="sm"
@@ -298,7 +292,7 @@ function CreateUser(props) {
               isLoading={isLoading}
               colorScheme="blue"
               onClick={handleClickRegister} >
-              {isRegistered ? 'Update' : 'Register'}
+              {web3Address !== "0x0000000000000000000000000000000000000000" ? 'Update' : 'Register'}
             </Button>
           </Box>
         </VStack>
