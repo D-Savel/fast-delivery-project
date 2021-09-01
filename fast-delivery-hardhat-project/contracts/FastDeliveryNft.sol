@@ -12,6 +12,7 @@ contract FastDeliveryNft is ERC721 {
 
     /// @dev ERC20 contract choose for Daid tokens ICO
     DaidToken private _daidToken;
+    Status public status;
 
     enum Status {
         onLine,
@@ -20,8 +21,6 @@ contract FastDeliveryNft is ERC721 {
         delivered,
         deleted
     }
-
-    Status public status;
 
     struct Delivery {
         Status status;
@@ -54,17 +53,8 @@ contract FastDeliveryNft is ERC721 {
     constructor(address tokenContractAddress_) ERC721("Delivery", "DLV") {
         _tokenContractAddress = tokenContractAddress_; //Token smartcontract address
         _daidToken = DaidToken(tokenContractAddress_); // Token smartcontract link
-        createDelivery(
-            "Delivery0",
-            "Delivery0",
-            "Delivery0",
-            "Delivery0",
-            "Delivery0",
-            "Delivery0",
-            "Delivery0",
-            "Delivery0",
-            0
-        );
+        // Id for delivery start at 1 instead 0
+        _deliveryId.increment();
     }
 
     // mint delivery NFT
