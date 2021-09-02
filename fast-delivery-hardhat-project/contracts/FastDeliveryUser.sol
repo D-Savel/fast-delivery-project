@@ -3,9 +3,17 @@
 pragma solidity ^0.8.0;
 
 contract FastDeliveryUser {
+    UserProfil private _userProfil;
+
+    enum UserProfil {
+        none,
+        parcelSender,
+        deliveryman
+    }
+
     struct User {
-        address parcelSender;
-        address deliveryman;
+        UserProfil profil;
+        address userWeb3Address;
         string firstName;
         string lastName;
         string userAddress;
@@ -22,52 +30,31 @@ contract FastDeliveryUser {
 
     constructor() {}
 
-    function parcelSenderRegister(
+    function userRegister(
+        string memory profil_,
         string memory firstName_,
         string memory lastName_,
         string memory addressParcelSender_,
         string memory addressXParcelSender_,
         string memory addressYParcelSender_,
-        string memory addressInfo_,
-        string memory tel_,
-        string memory mail_
-    ) public returns (bool) {
-        _users[msg.sender] = User({
-            parcelSender: msg.sender,
-            deliveryman: 0x0000000000000000000000000000000000000000,
-            firstName: firstName_,
-            lastName: lastName_,
-            userAddress: addressParcelSender_,
-            addressX: addressXParcelSender_,
-            addressY: addressYParcelSender_,
-            companySiren: "0",
-            addressInfo: addressInfo_,
-            tel: tel_,
-            mail: mail_,
-            registerTimestamp: block.timestamp
-        });
-        return true;
-    }
-
-    function deliverymanRegister(
-        string memory firstName_,
-        string memory lastName_,
-        string memory addressDeliveryman_,
-        string memory addressXDeliveryman_,
-        string memory addressYDeliveryman_,
         string memory companySiren_,
         string memory addressInfo_,
         string memory tel_,
         string memory mail_
     ) public returns (bool) {
+        if (keccak256(abi.encodePacked(profil_)) == keccak256(abi.encodePacked("deliveryman"))) {
+            _userProfil = UserProfil.deliveryman;
+        } else {
+            _userProfil = UserProfil.parcelSender;
+        }
         _users[msg.sender] = User({
-            parcelSender: 0x0000000000000000000000000000000000000000,
-            deliveryman: msg.sender,
+            profil: _userProfil,
+            userWeb3Address: msg.sender,
             firstName: firstName_,
             lastName: lastName_,
-            userAddress: addressDeliveryman_,
-            addressX: addressXDeliveryman_,
-            addressY: addressYDeliveryman_,
+            userAddress: addressParcelSender_,
+            addressX: addressXParcelSender_,
+            addressY: addressYParcelSender_,
             companySiren: companySiren_,
             addressInfo: addressInfo_,
             tel: tel_,
@@ -81,11 +68,7 @@ contract FastDeliveryUser {
         return _users[userAddress_];
     }
 
-    function getUserType(address userAddress_) public view returns (string memory) {
-        if (_users[userAddress_].parcelSender == 0x0000000000000000000000000000000000000000) {
-            return "Deliveryman";
-        } else {
-            return "Parcel Sender";
-        }
+    function getUserType(address userAddress_) public view returns (UserProfil) {
+        return _users[userAddress_].profil;
     }
 }
