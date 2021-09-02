@@ -19,7 +19,6 @@ function User() {
     if (daidToken) {
       const getTokenBalance = async () => {
         try {
-          console.log('useEffect USER')
           setIsLoading(true)
           const getTokenBalance = await daidToken.balanceOf(web3State.account)
           setTokenBalance(Number(getTokenBalance))

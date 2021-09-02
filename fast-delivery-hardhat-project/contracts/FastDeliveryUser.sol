@@ -6,6 +6,7 @@ contract FastDeliveryUser {
     UserProfil private _userProfil;
 
     enum UserProfil {
+        none,
         parcelSender,
         deliveryman
     }

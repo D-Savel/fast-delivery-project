@@ -19,17 +19,18 @@ import {
 import axios from 'axios'
 import { FastDeliveryUserContext } from '../App'
 import { Web3Context } from 'web3-hooks'
+import { useIsMounted } from "../hooks/useIsMounted";
 
 function CreateUser(props) {
-  const { userAddress, setUserAddress } = props
+  const { userAddress, setUserAddress, userProfil } = props
   const [web3State] = useContext(Web3Context)
+  const fastDeliveryUser = useContext(FastDeliveryUserContext)
+  const isMounted = useIsMounted()
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [isAdress, setIsAddress] = useState(true);
-
-  const fastDeliveryUser = useContext(FastDeliveryUserContext)
   const [isLoading, setIsLoading] = useState(false)
-  const [userProfil, setUserProfil] = useState('Choose your profil')
+  const [currentProfil, setCurrentProfil] = useState(userProfil)
   const [web3Address, setWeb3Address] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -62,14 +63,14 @@ function CreateUser(props) {
     }
     request()
   }
-    , [userAddress])
+    , [userAddress, isMounted])
 
   const handleClickRegister = async (e) => {
     e.preventDefault()
     if (firstName && lastName && addressX && addressY && tel && mail && isAdress) {
       try {
         setIsLoading(true)
-        let tx = await fastDeliveryUser.userRegister(userProfil, firstName, lastName, userAddress, addressX, addressY, companySiren, addressInfo, tel, mail)
+        let tx = await fastDeliveryUser.userRegister(currentProfil, firstName, lastName, userAddress, addressX, addressY, companySiren, addressInfo, tel, mail)
         console.log(tx)
         await tx.wait()
         toast({
@@ -109,14 +110,9 @@ function CreateUser(props) {
       const getUserInfo = async () => {
         try {
           const userInfo = await fastDeliveryUser.getUserInfo(web3State.account)
-          console.log(userInfo, 'userInfo')
-          if (userInfo[1] === "0x0000000000000000000000000000000000000000") {
-            setUserProfil("")
-          } else if (userInfo[0] === 0) {
-            setUserProfil("parcelSender")
-          } else if (userInfo[0] === 1) {
-            setUserProfil("deliveryman")
-          }
+          if (userInfo[0] === 0) { setCurrentProfil("0") }
+          if (userInfo[0] === 1) { setCurrentProfil("parcelSender") }
+          if (userInfo[0] === 2) { setCurrentProfil("deliveryman") }
           setWeb3Address(userInfo[1])
           setFirstName(userInfo[2])
           setLastName(userInfo[3])
@@ -130,7 +126,6 @@ function CreateUser(props) {
         }
       }
       getUserInfo()
-
     }
   }, [fastDeliveryUser, web3State.account, setUserAddress])
 
@@ -142,7 +137,7 @@ function CreateUser(props) {
         <Heading size="xl">Fast Delivery register</Heading>
       </Center>
       <Center w="420px" p="1">
-        <Heading size="sm">{userProfil && ('You are already registered with this profil !')}</Heading>
+        <Heading size="sm">{userProfil !== "0" && web3Address !== "0x0000000000000000000000000000000000000000" && ('You are already registered with this profil !')}</Heading>
       </Center>
       <Box m="2" border="1px" borderRadius="lg" w="sm" bg="blue.500" borderColor="blue.300">
         <Box m="2" as="form">
@@ -152,8 +147,8 @@ function CreateUser(props) {
               size="sm"
               borderRadius="lg"
               bg="light"
-              onChange={(event) => setUserProfil(event.target.value)}
-              value={userProfil}
+              onChange={(event) => setCurrentProfil(event.target.value)}
+              value={currentProfil}
               placeholder="Select your profil">
               <option value="parcelSender">Sender</option>
               <option value="deliveryman">Deliveryman</option>
@@ -161,12 +156,12 @@ function CreateUser(props) {
           </FormControl>
         </Box>
       </Box>
-      {userProfil && (
+      {currentProfil !== "0" && currentProfil !== "" && (
         <VStack >
           <Box border="1px" borderRadius="lg" w="sm" bg="blue.500" borderColor="blue.300">
             <Box m="2" as="form">
               <FormControl isRequired>
-                <FormLabel my="0" htmlFor="firstName">{userProfil === "parcelSender" ? 'First name' : 'Manager first name'}</FormLabel>
+                <FormLabel my="0" htmlFor="firstName">{currentProfil === "parcelSender" ? 'First name' : 'Manager first name'}</FormLabel>
                 <Input
                   size="sm"
                   borderRadius="lg"
@@ -178,7 +173,7 @@ function CreateUser(props) {
                   isInvalid={firstName === "" ? true : false} />
               </FormControl>
               <FormControl isRequired>
-                <FormLabel pt="1" my="0" htmlFor="lastName">{userProfil === "parcelSender" ? 'Last name' : 'Manager last name'}</FormLabel>
+                <FormLabel pt="1" my="0" htmlFor="lastName">{currentProfil === "parcelSender" ? 'Last name' : 'Manager last name'}</FormLabel>
                 <Input
                   size="sm"
                   borderRadius="lg"
@@ -190,7 +185,7 @@ function CreateUser(props) {
                   isInvalid={lastName === "" ? true : false} />
               </FormControl>
               <FormControl isRequired>
-                <FormLabel pt="1" my="0" htmlFor="address">{userProfil === "parcelSender" ? 'Address' : 'Company address'}</FormLabel>
+                <FormLabel pt="1" my="0" htmlFor="address">{currentProfil === "parcelSender" ? 'Address' : 'Company address'}</FormLabel>
                 <Input
                   size="sm"
                   borderRadius="lg"
@@ -229,7 +224,7 @@ function CreateUser(props) {
                   </List>
                 }
               </FormControl>
-              {userProfil !== "parcelSender" && (<FormControl isRequired>
+              {currentProfil !== "parcelSender" && (<FormControl isRequired>
                 <FormLabel pt="0" my="1" htmlFor="companySirenNumber">Company Siren Number</FormLabel>
                 <Input
                   size="sm"
@@ -284,9 +279,9 @@ function CreateUser(props) {
               </FormControl>
             </Box>
           </Box>
-          <Box py="2">
+          <Box>
             <Button
-              size="md"
+              size="sm"
               borderRadius="lg"
               type="submit"
               isLoading={isLoading}
@@ -296,8 +291,7 @@ function CreateUser(props) {
             </Button>
           </Box>
         </VStack>
-      )
-      }
+      )}
     </Flex>
   )
 }

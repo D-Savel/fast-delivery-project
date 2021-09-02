@@ -18,7 +18,8 @@ import CreateUser from './CreateUser'
 
 function Dapp() {
   const [web3State, login] = useContext(Web3Context)
-  const [userAddress, setUserAddress] = useState('');
+  const [userAddress, setUserAddress] = useState('')
+  const [userProfil, setUserProfil] = useState("0")
 
   return (
     <>
@@ -26,38 +27,35 @@ function Dapp() {
         <Box position="sticky" w="100%" top="0" zIndex="sticky">
           <HStack as="nav" bg="gray.300" py="1">
             <Link as={ReachLink} to={'/Home'} px="5">Home</Link>
-            <Link as={ReachLink} to={'/CreateUser'} ml="2" px="5"> My account </Link>
+            {userProfil !== "0" && (<Link as={ReachLink} to={'/CreateUser'} ml="2" px="5"> My account </Link>)}
             <Link as={ReachLink} to={'/GetTokens'} px="5">Get Tokens</Link>
           </HStack>
           <Header />
         </Box>
-        <VStack pb="20">
+        <VStack pb="10">
           {!web3State.isLogged ?
             <>
               <Center px="2" mt="10" mb="5" w="75%" py="12" bg="red.500" fontSize="20" color="white">Vous devez vous connecter à MetaMask sur le TestNet Kovan</Center>
-              {!web3State.isLogged && (<Button colorScheme="orange" onClick={login}>login MetaMask
-              </Button>)}
+              <Button colorScheme="orange" onClick={login}>login MetaMask</Button>)
             </> :
-            <>
-              <Switch>
-                <Route exact path='/' >
-                  <CreateUser userAddress={userAddress} setUserAddress={setUserAddress} />
-                </Route>
-                <Route path='/Home'>
-                  <LandingPage userAddress={userAddress} setUserAddress={setUserAddress} />
-                </Route>
-                <Route path='/GetTokens' component={GetTokens} />
-                <Route path='/'>
-                  <CreateUser userAddress={userAddress} setUserAddress={setUserAddress} />
-                </Route>
-              </Switch>
-            </>
+            <Switch>
+              <Route path='/Home'>
+                <LandingPage userAddress={userAddress} setUserAddress={setUserAddress} userProfil={userProfil} setUserProfil={setUserProfil} />
+              </Route>
+              <Route path='/CreateUser'>
+                <CreateUser userAddress={userAddress} setUserAddress={setUserAddress} userProfil={userProfil} setUserProfil={setUserProfil} />
+              </Route>
+              <Route path='/GetTokens' component={GetTokens} />
+              <Route path='/'>
+                <LandingPage userAddress={userAddress} setUserAddress={setUserAddress} userProfil={userProfil} setUserProfil={setUserProfil} />
+              </Route>
+            </Switch>
           }
         </VStack>
       </Router>
-      < Footer />
+      <Footer />
     </>
   )
 }
-
 export default Dapp
+
