@@ -1,0 +1,25 @@
+export const deliveryFile =
+{
+  id: 1,
+  firstNameSender: "A",
+  lastNameSender: "B",
+  addressSender: "Avenue C",
+  infoSender: "D",
+  telSender: "01",
+  mailSender: "mail01",
+  firstNameRecipient: "E",
+  lastNameRecipient: "F",
+  addressRecipient: "Avenue G",
+  infoRecipient: "H",
+  telRecipient: "02",
+  mailRecipient: "mail02",
+  deliverymanNameCompany: "Company I",
+  deliveymanName: "J",
+  deliverymanAddress: "Avenue K",
+  deliverymanInfo: "L",
+  deliverymanTel: "03",
+  deliverymanMail: "Mail 03",
+  distance: "0,253",
+  price: 5,
+  deliveryStatus: 0
+}
