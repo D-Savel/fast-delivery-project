@@ -13,7 +13,6 @@ contract FastDeliveryUser {
 
     struct User {
         UserProfil profil;
-        address userWeb3Address;
         string firstName;
         string lastName;
         string userAddress;
@@ -49,7 +48,6 @@ contract FastDeliveryUser {
         }
         _users[msg.sender] = User({
             profil: _userProfil,
-            userWeb3Address: msg.sender,
             firstName: firstName_,
             lastName: lastName_,
             userAddress: addressParcelSender_,

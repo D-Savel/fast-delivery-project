@@ -28,14 +28,15 @@ contract FastDeliveryNft is ERC721 {
         address deliveryman;
         string firstNameRecipient;
         string lastNameRecipient;
+        string addressRecipient;
         string addressXRecipient;
         string addressYRecipient;
         string addressInfoRecipient;
         string telRecipient;
         string mailRecipient;
-        string deliveryDay;
-        uint256 deliveryAmount;
-        string deliveryCode;
+        uint8 deliveryAmount;
+        string deliveryDistance;
+        bytes32 deliveryCode;
         uint256 onlineTimestamp;
         uint256 attributionTimestamp;
         uint256 collectTimestamp;
@@ -66,8 +67,8 @@ contract FastDeliveryNft is ERC721 {
         string memory addressInfoRecipient_,
         string memory telRecipient_,
         string memory mailRecipient_,
-        string memory deliveryDay_,
-        uint256 deliveryAmount_
+        uint8 deliveryAmount_,
+        string memory deliveryDistance_
     ) public returns (uint256) {
         require(
             deliveryAmount_ < _daidToken.balanceOf(msg.sender),
@@ -84,14 +85,15 @@ contract FastDeliveryNft is ERC721 {
             deliveryman: 0x0000000000000000000000000000000000000000,
             firstNameRecipient: firstNameRecipient_,
             lastNameRecipient: lastNameRecipient_,
+            addressRecipient: addressXRecipient_,
             addressXRecipient: addressXRecipient_,
             addressYRecipient: addressYRecipient_,
             addressInfoRecipient: addressInfoRecipient_,
             telRecipient: telRecipient_,
             mailRecipient: mailRecipient_,
-            deliveryDay: deliveryDay_,
             deliveryAmount: deliveryAmount_,
-            deliveryCode: "0",
+            deliveryDistance: deliveryDistance_,
+            deliveryCode: 0x294c9d1b143119582bd1203b3d87ef648a89f6e34daf2f397e748427bdebf598,
             onlineTimestamp: block.timestamp,
             attributionTimestamp: 0,
             collectTimestamp: 0,
@@ -169,7 +171,7 @@ contract FastDeliveryNft is ERC721 {
     }
 
     // Collect delivery by a deliveryman
-    function collectDelivery(uint256 deliveryId_, string memory deliverycode_) public returns (bool) {
+    function collectDelivery(uint256 deliveryId_, bytes32 deliverycode_) public returns (bool) {
         require(
             _deliveries[deliveryId_].parcelSender == msg.sender,
             "FastDeliveryNft: Only parcel sender can access this function"
