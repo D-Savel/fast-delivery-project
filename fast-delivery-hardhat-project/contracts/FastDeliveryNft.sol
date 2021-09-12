@@ -26,15 +26,15 @@ contract FastDeliveryNft is ERC721 {
         Status status;
         address parcelSender;
         address deliveryman;
-        string firstNameRecipient;
-        string lastNameRecipient;
-        string addressRecipient;
-        string addressXRecipient;
-        string addressYRecipient;
-        string addressInfoRecipient;
-        string telRecipient;
-        string mailRecipient;
-        uint8 deliveryAmount;
+        string recipientFirstName;
+        string recipientLastName;
+        string recipientAddress;
+        string recipientAddressX;
+        string recipientAddressY;
+        string recipientAddressInfo;
+        string recipientTel;
+        string recipientMail;
+        uint256 deliveryAmount;
         string deliveryDistance;
         bytes32 deliveryCode;
         uint256 onlineTimestamp;
@@ -46,6 +46,8 @@ contract FastDeliveryNft is ERC721 {
     address private _tokenContractAddress;
     uint256[] private userDeliveriesArray;
     Counters.Counter private _deliveryId;
+    uint256 _profit;
+    uint256 _profitRate = 20;
 
     mapping(uint256 => Delivery) private _deliveries;
     mapping(address => uint256[]) private _userDeliveriesId;
@@ -60,14 +62,15 @@ contract FastDeliveryNft is ERC721 {
 
     // mint delivery NFT
     function createDelivery(
-        string memory firstNameRecipient_,
-        string memory lastNameRecipient_,
-        string memory addressXRecipient_,
-        string memory addressYRecipient_,
-        string memory addressInfoRecipient_,
-        string memory telRecipient_,
-        string memory mailRecipient_,
-        uint8 deliveryAmount_,
+        string memory recipientFirstName_,
+        string memory recipientLastName_,
+        string memory recipientAddress_,
+        string memory recipientAddressX_,
+        string memory recipientAddressY_,
+        string memory recipientAddressInfo_,
+        string memory recipientTel_,
+        string memory recipientMail_,
+        uint256 deliveryAmount_,
         string memory deliveryDistance_
     ) public returns (uint256) {
         require(
@@ -83,14 +86,14 @@ contract FastDeliveryNft is ERC721 {
             status: Status.onLine,
             parcelSender: msg.sender,
             deliveryman: 0x0000000000000000000000000000000000000000,
-            firstNameRecipient: firstNameRecipient_,
-            lastNameRecipient: lastNameRecipient_,
-            addressRecipient: addressXRecipient_,
-            addressXRecipient: addressXRecipient_,
-            addressYRecipient: addressYRecipient_,
-            addressInfoRecipient: addressInfoRecipient_,
-            telRecipient: telRecipient_,
-            mailRecipient: mailRecipient_,
+            recipientFirstName: recipientFirstName_,
+            recipientLastName: recipientLastName_,
+            recipientAddress: recipientAddress_,
+            recipientAddressX: recipientAddressX_,
+            recipientAddressY: recipientAddressY_,
+            recipientAddressInfo: recipientAddressInfo_,
+            recipientTel: recipientTel_,
+            recipientMail: recipientMail_,
             deliveryAmount: deliveryAmount_,
             deliveryDistance: deliveryDistance_,
             deliveryCode: 0x294c9d1b143119582bd1203b3d87ef648a89f6e34daf2f397e748427bdebf598,
@@ -207,7 +210,12 @@ contract FastDeliveryNft is ERC721 {
         _burn(deliveryId_);
         _deliveries[deliveryId_].status = Status.delivered;
         _deliveries[deliveryId_].deliveredTimestamp = block.timestamp;
-        _daidToken.transferFrom(address(this), msg.sender, _deliveries[deliveryId_].deliveryAmount);
+        _daidToken.transferFrom(
+            address(this),
+            msg.sender,
+            _deliveries[deliveryId_].deliveryAmount * ((100 - _profitRate) / 100)
+        );
+        _profit += _deliveries[deliveryId_].deliveryAmount * (_profitRate / 100);
         return true;
     }
 
@@ -217,5 +225,17 @@ contract FastDeliveryNft is ERC721 {
 
     function getDeliveriesIdByAddress(address userAddress) public view returns (uint256[] memory) {
         return _userDeliveriesId[userAddress];
+    }
+
+    function getlastId() public view returns (uint256) {
+        return _deliveryId.current() - 1;
+    }
+
+    function getUserDeliveriesAmountBalance() public view returns (uint256) {
+        return _userDeliveriesAmountBalance[msg.sender];
+    }
+
+    function getProfitBalance() public view returns (uint256) {
+        return _profit;
     }
 }

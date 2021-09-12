@@ -6,3 +6,28 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model db_75 {
+  id_75                String?  @db.VarChar(30)
+  id_fantoir           String?  @db.VarChar(20)
+  numero               String?  @db.VarChar(10)
+  rep                  String?  @db.VarChar(5)
+  nom_voie             String?  @db.VarChar(80)
+  code_postal          Int?
+  code_insee           Int?
+  nom_commune          String?  @db.VarChar(50)
+  x                    Decimal? @db.Decimal
+  y                    Decimal? @db.Decimal
+  lon                  Decimal? @db.Decimal
+  lat                  Decimal? @db.Decimal
+  libelle_acheminement String?  @db.VarChar(30)
+  nom_afnor            String?  @db.VarChar(80)
+  adresse              String?  @db.VarChar(180)
+  id                   Int      @id @default(autoincrement())
+}
+
+model db_users {
+  id       Int     @id @default(autoincrement())
+  login    String? @db.VarChar(30)
+  password String? @db.VarChar(32)
+}
