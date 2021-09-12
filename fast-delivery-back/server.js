@@ -3,6 +3,10 @@ const fsPromises = require('fs/promises')
 const { PrismaClient } = require('@prisma/client')
 const express = require('express')
 const cors = require('cors')
+const nodemailer = require('nodemailer');
+require('dotenv').config()
+
+const path = require('path');
 
 const LOG_FILE = 'logs/access-log.txt'
 const port = process.env.PORT || 3333
@@ -36,6 +40,9 @@ const shower = async (req, res, next) => {
   next()
 }
 
+// Static folder
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
 app.use(cors())
 app.use(express.urlencoded({ extended: false })) // to support URL-encoded bodies
 app.use(express.json()) // to support JSON-encoded bodies
@@ -43,12 +50,62 @@ app.use(timer)
 app.use(logger)
 app.use(shower)
 
+let transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    type: "login", // default
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS
+  },
+  tls: {
+    // do not fail on invalid certs
+    rejectUnauthorized: false
+  }
+});
+
+
+// verifying the connection configuration
+transporter.verify(function (error, success) {
+  if (error) {
+    console.log(error);
+  } else {
+    console.log("Server is ready to take our messages!");
+  }
+});
+
+app.post('/access', (req, res, next) => {
+  let email = req.body.email
+  let message = req.body.message
+  let content = `${message} `
+  let mail = {
+    from: "Fast Delivery",
+    to: email,
+    subject: "Delivery Code send by FastDelivery",
+    text: content
+  }
+
+  transporter.sendMail(mail, (err, data) => {
+    if (err) {
+      res.json({
+        status: 'fail'
+      })
+    } else {
+      res.json({
+        status: 'success'
+      })
+      console.log(`mail send to ${email} with success`)
+    }
+  })
+})
+
 app.get('/address', async (req, res) => {
   const { address } = req.query
   let streetNumber = ''
   // Clean and split request
-  let address1 = address.replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+°,\-.\/:;<=>?@\[\]^_`{|}~]/g, " ")
-    .replace(/\s{2,}/g, " ")
+  let address1 = address.replaceAll(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+°,\-.\/:;<=>?@\[\]^_`{|}~]/g, " ")
+    .replaceAll(/\s{2,}/g, " ")
     .toUpperCase()
     .split(' ')
   // Check if request start with a street number to use parameter for quering database
@@ -102,3 +159,4 @@ app.post('/addressforxy', async (req, res) => {
 app.listen(port, () =>
   console.log(`server ready at: http://localhost:${port}`),
 )
+

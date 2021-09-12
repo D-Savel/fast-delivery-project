@@ -29,14 +29,14 @@ contract Faucet {
     /**
      * @dev Construtor intancies the tokens owner (seller) and link to ERC20 (DaidToken).
      * @param tokenContractAddress_ : Address of tokens owner in ERC20 contract.
-     * @param faucetAmount_ : faucet amount.
+     * @param tokenFaucetAmount_ : faucet amount.
      */
 
-    constructor(address tokenContractAddress_, uint256 faucetAmount_) {
+    constructor(address tokenContractAddress_, uint256 tokenFaucetAmount_) {
         _tokenContractAddress = tokenContractAddress_; //Token smartcontract address
         _daidToken = DaidToken(tokenContractAddress_); // Token smartcontract link
         _tokenOwner = _daidToken.tokenOwner();
-        _faucetAmount = faucetAmount_;
+        _faucetAmount = tokenFaucetAmount_ * 10**18;
     }
 
     /**

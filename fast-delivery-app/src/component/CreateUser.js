@@ -22,7 +22,7 @@ import { Web3Context } from 'web3-hooks'
 import { useIsMounted } from "../hooks/useIsMounted";
 
 function CreateUser(props) {
-  const { userAddress, setUserAddress, userProfil } = props
+  const { userAddress, setUserAddress, userProfil, setUserProfil } = props
   const [web3State] = useContext(Web3Context)
   const fastDeliveryUser = useContext(FastDeliveryUserContext)
   const isMounted = useIsMounted()
@@ -43,14 +43,14 @@ function CreateUser(props) {
   const toast = useToast()
 
   useEffect(() => {
-    let url = `https://stormy-gorge-78325.herokuapp.com/address/?address=${userAddress}`
-    console.log(url, 'url')
+    let url = `http://localhost:3333/address/?address=${userAddress}`
+    console.log(url, 'url CreateUSer')
     const request = async () => {
       setLoading(true)
       try {
         let response = await axios.get(url)
         setSearchResults(response.data)
-        if (response.data.length) {
+        if (response.data.length & isMounted.current) {
           userAddress.toUpperCase().trim().localeCompare(response.data[0].adresse.trim()) === 0 ? setIsAddress(true) : setIsAddress(false)
           setaddressX(response.data[0].lon.toString())
           setaddressY(response.data[0].lat.toString())
@@ -95,6 +95,7 @@ function CreateUser(props) {
       } finally {
         setIsLoading(false)
         setFirstRegistration(false)
+        setUserProfil(currentProfil)
       }
     } else {
       toast({
