@@ -3,8 +3,8 @@ const { expect } = require('chai');
 
 describe('Faucet', function () {
   let DaidToken, daidToken, Faucet, faucet, dev, tokenOwnerTest, faucetOwner, alice, bob;
-  const INITIAL_SUPPLY = 10000000000;
-  const FAUCET_AMOUNT = 100;
+  const INITIAL_SUPPLY = ethers.utils.parseEther("1000000000000");
+  const FAUCET_AMOUNT = 10; // DAID Tokens
 
   beforeEach(async function () {
     // DaidToken deployment
@@ -43,14 +43,14 @@ describe('Faucet', function () {
           const FAUCET_DELAY = (block.timestamp) + 86400; // 1 days = 86400 seconds
           const currentAliceBalance = await daidToken.balanceOf(alice.address);
           await (faucet.connect(alice)).grabTokens();
-          expect(await daidToken.balanceOf(alice.address)).to.equal(currentAliceBalance.add(FAUCET_AMOUNT));
+          expect(await daidToken.balanceOf(alice.address)).to.equal(currentAliceBalance.add(ethers.utils.parseEther(FAUCET_AMOUNT.toString())));
           expect(await faucet.faucetDelayOf(alice.address)).to.above(FAUCET_DELAY);
         });
       it('should tokens owner balance decrease grabbed faucet tokens amount', async function () {
         const currentTokenOwnerBalance = await daidToken.balanceOf(tokenOwnerTest.address);
         await faucet.connect(alice).grabTokens();
         expect(await daidToken.balanceOf(tokenOwnerTest.address))
-          .to.equal(currentTokenOwnerBalance.sub(FAUCET_AMOUNT));
+          .to.equal(currentTokenOwnerBalance.sub(ethers.utils.parseEther(FAUCET_AMOUNT.toString())));
       });
       it('should revert for tokenOwner', async function () {
         await expect(faucet.connect(tokenOwnerTest).grabTokens())
@@ -73,11 +73,11 @@ describe('Faucet', function () {
         await ethers.provider.send('evm_increaseTime', [86401]); // 1 days + 1 sec. (time elapsed for block minting)= 86401 seconds
         await ethers.provider.send('evm_mine');
         const currentBobBalance = await daidToken.balanceOf(alice.address);
-        expect(await daidToken.balanceOf(bob.address)).to.equal(currentBobBalance.add(FAUCET_AMOUNT));
+        expect(await daidToken.balanceOf(bob.address)).to.equal(currentBobBalance.add(ethers.utils.parseEther(FAUCET_AMOUNT.toString())));
       });
       it('should emit tranfer event', async function () {
         expect(await faucet.connect(bob).grabTokens())
-          .to.emit(daidToken, 'Transfer').withArgs(tokenOwnerTest.address, bob.address, FAUCET_AMOUNT);
+          .to.emit(daidToken, 'Transfer').withArgs(tokenOwnerTest.address, bob.address, ethers.utils.parseEther(FAUCET_AMOUNT.toString()));
       });
     });
     describe('faucetDelayOf', function () {

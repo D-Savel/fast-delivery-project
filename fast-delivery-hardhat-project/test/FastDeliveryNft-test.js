@@ -4,66 +4,66 @@ describe('FastDeliveryNft', function () {
   let DaidToken, daidToken, FastDeliveryNft, fastDeliveryNft, dev, tokenOwnerTest, parcelSender, deliveryman, bob;
 
   beforeEach(async function () {
-    // SmartWords deployment
+    // DAIDToken deployment
     [dev, tokenOwnerTest, parcelSender, deliveryman, bob] = await ethers.getSigners();
-    const INITIAL_SUPPLY = ethers.utils.parseEther('1000');
+    const INITIAL_SUPPLY = ethers.utils.parseEther("1000000000000");
+    const NAME = 'Delivery';
+    const SYMBOL = 'DLV';
 
     DaidToken = await ethers.getContractFactory('DaidToken');
     daidToken = await DaidToken.connect(dev).deploy(tokenOwnerTest.address, INITIAL_SUPPLY);
     await daidToken.deployed();
 
+    // FastdeliveryNft deployment
     FastDeliveryNft = await ethers.getContractFactory('FastDeliveryNft');
-    fastDeliveryNft = await FastDeliveryNft.connect(dev).deploy();
+    fastDeliveryNft = await FastDeliveryNft.connect(dev).deploy(daidToken.address,);
     await fastDeliveryNft.deployed();
   });
-  describe('FastDeliveryNft create delivery function', function () {
-    const TITLE = 'My Copyright text';
-    const TEXT_HASH = ethers.utils.id('TEXTTEXTTEXTTEXTTEXT');
-    const NFT_URI = 'MyText';
-    beforeEach(async function () {
-      await fastDeliveryNft.connect(parcelSender).registerText(TITLE, TEXT_HASH, NFT_URI);
-    });
-    it('tokenURI using _baseURI(hardcoding="") et URI should be assign to tokenURI', async function () {
-      const baseURI = '';
-      expect(await smartWords.tokenURI(0)).to.equal(baseURI + NFT_URI);
-    });
-    it('title should be assigned to Text struct with id 0', async function () {
-      expect(await smartWords.getTitleOf(0)).to.equal(TITLE);
-    });
-    it('textHash should be assigned to Text struct with id 0', async function () {
-      expect(await smartWords.getTextHashOf(0)).to.equal(TEXT_HASH);
-    });
-    it('Timestamp should be assigned to Text struct with id 0', async function () {
-      const currentBlock = await ethers.provider.getBlock();
-      const TIME_STAMP = currentBlock.timestamp;
-      expect(await smartWords.getTimestampOf(0)).to.equal(TIME_STAMP);
-    });
-    // test not passed : good value in struct TEXT  ???
-    it('Text struct should contained TITLE, TEXT_HASH, TIME_STAMP for Text struct with id 0', async function () {
-      const currentBlock = await ethers.provider.getBlock();
-      const TIME_STAMP = currentBlock.timestamp;
-      expect((await smartWords.getTextInfo(0))[0]).to.be.equal(TITLE);
-      expect((await smartWords.getTextInfo(0))[1]).to.be.equal(TEXT_HASH);
-      expect((await smartWords.getTextInfo(0))[2]).to.be.equal(ethers.BigNumber.from(TIME_STAMP));
-    });
-    it('should revert if textHash have already been registered', async function () {
-      await expect(smartWords.connect(textOwner1).registerText('My Copyright text2', TEXT_HASH, 'MyText2'))
-        .to.be.revertedWith('SmartWords: This text has already been registred with copyright');
-    });
+
+  describe('FastDeliveryNft createDelivery function', function () {
   });
-  describe('SmartWords textHashOf function', function () {
-    const TITLE = 'My Copyright text';
-    const TEXT_HASH = ethers.utils.id('TEXTTEXTTEXTTEXTTEXT');
-    const NFT_URI = 'MyText';
+
+  describe('FastDeliveryNft delivered function', function () {
+
     beforeEach(async function () {
-      await smartWords.connect(textOwner1).registerText(TITLE, TEXT_HASH, NFT_URI);
+      const recipient = {
+        FirstName_: "Bob",
+        LastName_: "Doe",
+        Address_: "Paris",
+        AddressX_: "45",
+        AddressY_: "46",
+        AddressInfo_: "45",
+        Tel_: "0102",
+        Mail_: "@mail",
+        deliveryAmount_: ethers.utils.parseEther("2"),
+        deliveryDistance_: "3,5"
+      };
+      await daidToken.connect(parcelSender).approve(fastDeliveryNft.address, ethers.utils.parseEther("500000"))
+      await daidToken.connect(tokenOwnerTest).transfer(parcelSender.address, ethers.utils.parseEther("50"));
+      await fastDeliveryNft.connect(parcelSender).createDelivery(
+        recipient.FirstName_,
+        recipient.LastName_,
+        recipient.Address_,
+        recipient.AddressX_,
+        recipient.AddressY_,
+        recipient.AddressInfo_,
+        recipient.Tel_,
+        recipient.Mail_,
+        recipient.deliveryAmount_,
+        recipient.deliveryDistance_
+      );
+      const DELIVERY_CODE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("1234"));
+      const ID = 1;
+      await fastDeliveryNft.connect(deliveryman).attributeDelivery(1)
+      await fastDeliveryNft.connect(parcelSender).collectDelivery(1, DELIVERY_CODE)
     });
-    it('should be equal textOwner address if textHash have already been registered', async function () {
-      expect(await smartWords.textHashOf((TEXT_HASH))).to.equal(textOwner1.address);
-    });
-    it('should be address(0) if textHash have not been registered', async function () {
-      const NEW_TEXT_HASH = ethers.utils.id('NEWTEXTTEXTTEXTTEXTTEXT');
-      expect(await smartWords.textHashOf(NEW_TEXT_HASH)).to.equal(ethers.constants.AddressZero);
+    it('deliveryman token balance increase delivery amount * 0,8', async function () {
+      const DELIVERY_CODE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("1234"));
+      const ID = 1
+      const PROFIT_RATE = 20
+      const currentDeliverymanBalance = await daidToken.connect(deliveryman).balanceOf(deliveryman.address);
+      await fastDeliveryNft.connect(deliveryman).delivered(ID, DELIVERY_CODE);
+      expect(await daidToken.balanceOf(deliveryman.address)).to.equal(currentDeliverymanBalance + (ethers.utils.parseEther("2") * (100 - PROFIT_RATE)) / 100);
     });
   });
 });
