@@ -1,4 +1,5 @@
 import { useRef, useContext, useState, useEffect } from 'react'
+import { FastDeliveryNftAddress } from '../contracts/FastDeliveryNft'
 import { getDistance } from 'ol/sphere';
 import { utils, ethers } from 'ethers'
 import { Random } from 'random-js'
@@ -34,6 +35,7 @@ import { FastDeliveryUserContext } from '../App'
 import { DaidTokenContext } from '../App'
 import { Web3Context } from 'web3-hooks'
 import { useIsMounted } from "../hooks/useIsMounted";
+require('dotenv').config();
 
 function ParcelSenderBoard() {
 
@@ -94,7 +96,7 @@ function ParcelSenderBoard() {
 
   const [deliveryIdSender, setDeliveryIdSender] = useState([])
   const [deliveriesList, setDeliveriesList] = useState([])
-  const [idSelect, setIdSelect] = useState()
+  const [idSelect, setIdSelect] = useState("")
 
   const toast = useToast()
   const searchInputSender = useRef(null)
@@ -106,7 +108,7 @@ function ParcelSenderBoard() {
     if (daidToken) {
       const getAllowance = async () => {
         try {
-          const _allowance = await daidToken.allowance(web3State.account, "0xc09D022AA16F0c98271b315FAd704031d7254277")
+          const _allowance = await daidToken.allowance(web3State.account, FastDeliveryNftAddress)
           const allowance = ethers.utils.formatEther(_allowance)
           Number(allowance) < deliveryPrice ? setIsApprove(false) : setIsApprove(true)
         } catch (e) {
@@ -144,18 +146,31 @@ function ParcelSenderBoard() {
 
   // fetch all delivery id for user
   useEffect(() => {
-    if (fastDeliveryNft | displayAddDelivery === false) {
+    if (fastDeliveryNft) {
       const getDeliveryId = async () => {
         try {
           const id = await fastDeliveryNft.getDeliveriesIdByAddress(web3State.account)
-          setDeliveryIdSender(id)
+          setDeliveryIdSender(id.filter(index => Number(index) !== 0))
         } catch (e) {
           console.log(e.message)
         }
       }
+      const cb = (Sender, tokenId) => {
+        getDeliveryId()
+      }
       getDeliveryId()
+      const onLineFilter = fastDeliveryNft.filters.OnLine(web3State.account)
+      const deletedeFilter = fastDeliveryNft.filters.Deleted(web3State.account)
+      // ecouter sur l'event de FastdeliveryNft
+      fastDeliveryNft.on(onLineFilter, cb)
+      fastDeliveryNft.on(deletedeFilter, cb)
+      return () => {
+        // arreter d'ecouter lorsque le component sera unmount
+        fastDeliveryNft.off(onLineFilter, cb)
+        fastDeliveryNft.off(deletedeFilter, cb)
+      }
     }
-  }, [displayAddDelivery, fastDeliveryNft, web3State.account])
+  }, [fastDeliveryNft, web3State.account])
 
   // fetch deliveries an create an array of deliveries for user
   useEffect(() => {
@@ -205,7 +220,7 @@ function ParcelSenderBoard() {
                 break;
               case 4:
                 DeliveryDateStatus = new Date(Number(deliveryInfo.onlineTimestamp * 1000))
-                DeliveryStatusInfo = deliveryStatusEnum[3]
+                DeliveryStatusInfo = deliveryStatusEnum[4]
                 break;
               default:
                 DeliveryDateStatus = "Date Error"
@@ -226,17 +241,17 @@ function ParcelSenderBoard() {
               senderAddressInfo: senderAddressInfo,
               senderTel: senderTel,
               senderMail: senderMail,
-              recipientFirstName: deliveryInfo[3],
-              recipientLastName: deliveryInfo[4],
-              recipientAddress: deliveryInfo[5],
-              recipientAddressInfo: deliveryInfo[8],
-              recipientTel: deliveryInfo[9],
-              recipientMail: deliveryInfo[10],
+              recipientFirstName: deliveryInfo.recipientFirstName,
+              recipientLastName: deliveryInfo.recipientLastName,
+              recipientAddress: deliveryInfo.recipientAddress,
+              recipientAddressInfo: deliveryInfo.recipientAddressInfo,
+              recipientTel: deliveryInfo.recipientTel,
+              recipientMail: deliveryInfo.recipientMail,
               deliverymanCompany: deliverymanInfo.lastName,
               deliverymanManagerName: deliverymanInfo.firstName,
               deliverymanAddress: deliverymanInfo.userAddress,
-              deliverymanTel: deliverymanInfo[8],
-              deliverymanMail: deliverymanInfo[9],
+              deliverymanTel: deliverymanInfo.tel,
+              deliverymanMail: deliverymanInfo.mail,
               deliveryAmount: ethers.utils.formatEther(deliveryInfo.deliveryAmount),
               deliveryDistance: deliveryInfo.deliveryDistance,
               deliveryStatus: DeliveryStatusInfo,
@@ -256,14 +271,30 @@ function ParcelSenderBoard() {
           setLoadingList(false)
         }
       }
+      const cb = (Sender, deliveryman, tokenId) => {
+        getDeliveriesList()
+      }
       getDeliveriesList()
+      const attributedFilter = fastDeliveryNft.filters.Attributed(web3State.account)
+      const deliveredFilter = fastDeliveryNft.filters.Delivered(web3State.account)
+      const inDeliveryFilter = fastDeliveryNft.filters.InDelivery(web3State.account)
+      // ecouter sur l'event Transfer
+
+      fastDeliveryNft.on(attributedFilter, cb)
+      fastDeliveryNft.on(deliveredFilter, cb)
+      fastDeliveryNft.on(inDeliveryFilter, cb)
+      return () => {
+        // arreter d'ecouter lorsque le component sera unmount
+        fastDeliveryNft.off(attributedFilter, cb)
+        fastDeliveryNft.off(attributedFilter, cb)
+        fastDeliveryNft.off(inDeliveryFilter, cb)
+      }
     }
-  }
-    , [deliveryIdSender, fastDeliveryNft, fastDeliveryUser, senderAddress, senderAddressInfo, senderFirstName, senderLastName, senderMail, senderTel])
+  }, [deliveryIdSender, fastDeliveryNft, fastDeliveryUser, senderAddress, senderAddressInfo, senderFirstName, senderLastName, senderMail, senderTel, web3State.account])
 
 
   /* unused no fetch for sender
-  
+   
   // fetch address for sender input
   useEffect(() => {
     let url = `https://stormy-gorge-78325.herokuapp.com/address/?address=${senderAddress}`
@@ -313,12 +344,14 @@ function ParcelSenderBoard() {
 
   // fetch address for recipient input
   useEffect(() => {
-    let url = `http://localhost:3333/address/?address=${recipientAddress}`
-    console.log(url, 'url recipient search')
+    const urlServer = process.env.REACT_APP_URL_SERVER
+    console.log(urlServer, 'UrlServer')
+    let fetchUrl = `${urlServer}/address/?address=${recipientAddress}`
+    console.log(fetchUrl, 'url recipient search')
     const request = async () => {
       setLoadingRecipient(true)
       try {
-        let response = await axios.get(url)
+        let response = await axios.get(fetchUrl)
         setSearchResultsRecipient(response.data)
         if (response.data.length & isMounted.current) {
           recipientAddress.toUpperCase().trim().localeCompare(response.data[0].adresse.trim()) === 0 ? setIsRecipientAddress(true) : setIsRecipientAddress(false)
@@ -340,13 +373,16 @@ function ParcelSenderBoard() {
     , [isMounted, recipientAddress])
 
 
-  const handleClickDisplayDelivery = () => { setDisplayAddDelivery(!displayAddDelivery) }
+  const handleClickDisplayDelivery = () => {
+    setDisplayAddDelivery(!displayAddDelivery)
+    setIdSelect("")
+  }
 
   // Approve function
   const handleClickApprove = async () => {
     try {
       setLoadingApprove(true)
-      let tx = await daidToken.approve("0xc09D022AA16F0c98271b315FAd704031d7254277", ethers.utils.parseUnits("1000000"))
+      let tx = await daidToken.approve(FastDeliveryNftAddress, ethers.utils.parseUnits("1000000"))
       await tx.wait()
       toast({
         title: `Confirmed transaction : Token tranfer is approve for ${web3State.account}`,
@@ -421,9 +457,10 @@ function ParcelSenderBoard() {
 
     // email request
     const emailRequest = async () => {
+      let urlServer = process.env.REACT_APP_URL_SERVER
       let email = "dad.savel@gmail.com"
       let message = `${senderFirstName} ${senderLastName} send you a parcel\n The delivery code for retreiving parcel is : ${deliveryCode}`
-      const response = await axios.post("http://localhost:3333/access", { email: email, message: message })
+      const response = await axios.post(`${urlServer}/access`, { email: email, message: message })
       if (response.status === 'success') {
         alert("Message Sent.");
         this.resetForm()
@@ -457,7 +494,7 @@ function ParcelSenderBoard() {
       console.log(e.message)
     } finally {
       setIsLoading(false)
-      setIdSelect()
+      setIdSelect("")
     }
   }
 
@@ -490,11 +527,12 @@ function ParcelSenderBoard() {
     }
   }
 
+
   return (
     <>
-      <Box w="100%" px="2" pt="2" pb="3">
-        <HStack alignItems="center" justifyContent="space-beetween" w="100%">
-          <Heading pl="3" size="md">{!displayAddDelivery ? 'My Deliveries' : 'Add Delivery'}</Heading>
+      <Box w="100%" px="2" py="2">
+        <HStack position="sticky" top="125px" zIndex="sticky" pt="1" alignItems="center" justifyContent="space-beetween" w="100%">
+          <Heading pl="3" size="md">{!displayAddDelivery ? 'Deliveries' : 'Add Delivery'}</Heading>
           <Spacer />
           <Box>
             <Button
@@ -504,57 +542,58 @@ function ParcelSenderBoard() {
               borderRadius="lg"
               colorScheme="blue"
               onClick={handleClickDisplayDelivery}
-            > {displayAddDelivery ? '> My Deliveries' : '> Add Delivery'}</Button>
+            > {displayAddDelivery ? '> My Deliveries' : '> + Delivery'}</Button>
           </Box>
-          <Box as="form">
-            <FormControl isRequired>
-              <InputGroup>
-                <Input
-                  mr="2"
-                  w="90px"
-                  type="number"
-                  placeholder="Id"
-                  onChange={(event) => setIdSelect(event.target.value)}
-                />
-                <InputRightElement w="70px">
-                  <Button
-                    px="1"
-                    size="sm"
-                    borderRadius="lg"
-                    colorScheme="blue"
-                    type="button"
-                    onClick={handleClickPickUp}>
-                    Pick up
-                  </Button>
-                  {/* not implemented toDo
-                  <Button
-                    size="sm"
-                    borderRadius="lg"
-                    colorScheme="red"
-                    type="button"
-                    onClick={handleClickDel}>
-                    Del
-                  </Button>
-                  */}
-                </InputRightElement>
-              </InputGroup>
-            </FormControl>
-          </Box>
+          {!displayAddDelivery && (
+            <Box as="form">
+              <FormControl isRequired>
+                <InputGroup>
+                  <Input
+                    w="170px"
+                    type="number"
+                    placeholder="Id"
+                    onChange={(event) => setIdSelect(event.target.value)}
+                    value={idSelect}
+                  />
+                  <InputRightElement w="110px">
+                    <Button
+                      mr="1"
+                      px="1"
+                      size="sm"
+                      borderRadius="lg"
+                      colorScheme="blue"
+                      type="button"
+                      onClick={handleClickPickUp}>
+                      Pick up
+                    </Button>
+                    <Button
+                      size="sm"
+                      borderRadius="lg"
+                      colorScheme="red"
+                      type="button"
+                      onClick={handleClickDel}>
+                      Del
+                    </Button>
+                  </InputRightElement>
+                </InputGroup>
+              </FormControl>
+            </Box>
+          )}
         </HStack>
         {loadingList &&
           <Text> Loading...</Text>
         }
         {
-          !loadingList && deliveriesList.length < 1 && !displayAddDelivery &&
+          !loadingList && deliveryIdSender.length < 1 && !displayAddDelivery &&
           <Text> You don't have any delivery registered</Text>
         }
         {
-          !loadingList && deliveriesList.length > 0 && !displayAddDelivery && (
+          !loadingList && deliveryIdSender.length > 0 && !displayAddDelivery && (
             deliveriesList.map((delivery) => {
               return (
                 <Box pt="2" w="100 % " key={delivery.id}>
                   <Flex wrap="wrap" mt="2" >
-                    <Box display="flex" alignItems="center" justifyContent="center" w="25px" px="1">{delivery.id}</Box>
+                    <Box display="flex" alignItems="center" justifyContent="center" bg="gray.200" w="25px" px="1">{delivery.id}</Box>
                     <Box display="flex" mx="1" bg="blue.300">
                       <Popover trigger="hover" >
                         <PopoverTrigger>
@@ -605,7 +644,7 @@ function ParcelSenderBoard() {
                         <PopoverContent mx="1">
                           <PopoverArrow />
                           <PopoverCloseButton />
-                          <PopoverBody>{delivery.deliverymanCompany}</PopoverBody>
+                          <PopoverBody>{delivery.deliverymanCompany === "-" ? "Delivery not Attributed" : delivery.deliverymanCompany}</PopoverBody>
                           <PopoverBody>M. {delivery.deliverymanManagerName}</PopoverBody>
                           <PopoverBody>{delivery.deliverymanAddress}</PopoverBody>
                           <PopoverBody>{delivery.deliverymanTel}</PopoverBody>
@@ -613,12 +652,19 @@ function ParcelSenderBoard() {
                         </PopoverContent>
                       </Popover>
                     </Box>
-                    <Box display="flex" flex="1" alignItems="center" justifyContent="center" minW="100x">
-                      {delivery.deliveryStatus}
-                    </Box>
-                    <Box display="flex" flex="1" alignItems="center" justifyContent="center" minW="100" px="2">
-                      {delivery.timestamp}
-                    </Box>
+                    <Popover trigger="hover" >
+                      <PopoverTrigger>
+                        <Box display="flex" flex="1" alignItems="center" justifyContent="center" bg="orange.200" minW="100x">
+                          {delivery.deliveryStatus}
+                        </Box>
+                      </PopoverTrigger>
+                      <PopoverContent mx="1">
+                        <PopoverArrow />
+                        <PopoverCloseButton />
+                        <PopoverBody>{delivery.deliveryStatus}</PopoverBody>
+                        <PopoverBody>{delivery.timestamp}</PopoverBody>
+                      </PopoverContent>
+                    </Popover>
                   </Flex>
                   <Divider />
                 </Box>
@@ -896,15 +942,15 @@ function ParcelSenderBoard() {
                   borderRadius="lg"
                   type="button"
                   isLoading={loadingApprove}
-                  colorScheme={isApprove ? "green" : "danger"}
+                  colorScheme={isApprove ? "green" : "orange"}
                   onClick={handleClickApprove}
                   isDisabled={isApprove && true}
                 >{isApprove ? "Approved" : "Approve"}
                 </Button>
               </Box>
               <Box>
-                <Text> Distance : {deliveryDistance} Km</Text>
-                <Text> Price : {deliveryPrice} DAID</Text>
+                <Text> {isRecipientAddress && recipientAddress ? `Distance : ${deliveryDistance}` : "Distance : -"} Km</Text>
+                <Text> {isRecipientAddress && recipientAddress ? `Price : ${deliveryPrice}` : "Price : -"} DAID</Text>
               </Box>
               <Box>
                 <Button

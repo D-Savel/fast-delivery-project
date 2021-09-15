@@ -20,6 +20,7 @@ import axios from 'axios'
 import { FastDeliveryUserContext } from '../App'
 import { Web3Context } from 'web3-hooks'
 import { useIsMounted } from "../hooks/useIsMounted";
+require('dotenv').config();
 
 function CreateUser(props) {
   const { userAddress, setUserAddress, userProfil, setUserProfil } = props
@@ -43,12 +44,14 @@ function CreateUser(props) {
   const toast = useToast()
 
   useEffect(() => {
-    let url = `http://localhost:3333/address/?address=${userAddress}`
-    console.log(url, 'url CreateUSer')
+    const urlServer = process.env.REACT_APP_URL_SERVER
+    console.log(urlServer, 'UrlServer')
+    let fetchUrl = `${urlServer}/address/?address=${userAddress}`
+    console.log(fetchUrl, 'url Create User')
     const request = async () => {
       setLoading(true)
       try {
-        let response = await axios.get(url)
+        let response = await axios.get(fetchUrl)
         setSearchResults(response.data)
         if (response.data.length & isMounted.current) {
           userAddress.toUpperCase().trim().localeCompare(response.data[0].adresse.trim()) === 0 ? setIsAddress(true) : setIsAddress(false)

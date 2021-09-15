@@ -53,6 +53,12 @@ contract FastDeliveryNft is ERC721 {
     mapping(address => uint256[]) private _userDeliveriesId;
     mapping(address => uint256) private _userDeliveriesAmountBalance;
 
+    event OnLine(address indexed parcelSenderAccount, uint256 nftIndex);
+    event Attributed(address indexed parcelSenderAccount, address indexed deliverymanAccount, uint256 nftIndex);
+    event InDelivery(address indexed parcelSenderAccount, address indexed deliverymanAccount, uint256 nftIndex);
+    event Delivered(address indexed parcelSenderAccount, address indexed deliverymanAccount, uint256 nftIndex);
+    event Deleted(address indexed parcelSenderAccount, uint256 nftIndex);
+
     constructor(address tokenContractAddress_) ERC721("Delivery", "DLV") {
         _tokenContractAddress = tokenContractAddress_; //Token smartcontract address
         _daidToken = DaidToken(tokenContractAddress_); // Token smartcontract link
@@ -106,6 +112,7 @@ contract FastDeliveryNft is ERC721 {
         // Transfer delivery price to deliveries deposit fund
         _daidToken.transferFrom(msg.sender, address(this), deliveryAmount_);
         _userDeliveriesAmountBalance[msg.sender] += deliveryAmount_;
+        emit OnLine(msg.sender, newDeliveryId);
         return newDeliveryId;
     }
 
@@ -129,11 +136,12 @@ contract FastDeliveryNft is ERC721 {
                 index = i;
             }
         }
-        _daidToken.transferFrom(address(this), msg.sender, _deliveries[deliveryId_].deliveryAmount);
+        _daidToken.transfer(msg.sender, _deliveries[deliveryId_].deliveryAmount);
         _userDeliveriesAmountBalance[msg.sender] -= _deliveries[deliveryId_].deliveryAmount;
         delete _userDeliveriesId[msg.sender][index];
         _deliveries[deliveryId_].status = Status.deleted;
         _burn(deliveryId_);
+        emit Deleted(msg.sender, deliveryId_);
         return true;
     }
 
@@ -144,6 +152,7 @@ contract FastDeliveryNft is ERC721 {
         _deliveries[deliveryId_].status = Status.attributed;
         _deliveries[deliveryId_].deliveryman = msg.sender;
         _deliveries[deliveryId_].attributionTimestamp = block.timestamp;
+        emit Attributed(_deliveries[deliveryId_].parcelSender, msg.sender, deliveryId_);
         return true;
     }
 
@@ -188,12 +197,13 @@ contract FastDeliveryNft is ERC721 {
         _deliveries[deliveryId_].status = Status.inDelivery;
         _deliveries[deliveryId_].deliveryCode = deliverycode_;
         _deliveries[deliveryId_].collectTimestamp = block.timestamp;
+        emit InDelivery(msg.sender, _deliveries[deliveryId_].deliveryman, deliveryId_);
         return true;
     }
 
-    function delivered(uint256 deliveryId_, string memory code_) public returns (bool) {
+    function delivered(uint256 deliveryId_, bytes32 deliveryCode_) public returns (bool) {
         require(
-            keccak256(abi.encodePacked(code_)) == keccak256(abi.encodePacked(_deliveries[deliveryId_].deliveryCode)),
+            deliveryCode_ == _deliveries[deliveryId_].deliveryCode,
             "FastDeliveryNft: The delivery code for this delivery Id is false"
         );
         require(
@@ -205,17 +215,13 @@ contract FastDeliveryNft is ERC721 {
             _deliveries[deliveryId_].status == Status.inDelivery,
             "FastDeliveryNft: to be delivered, the delivery status must be in delivery"
         );
-        _daidToken.transferFrom(address(this), msg.sender, _deliveries[deliveryId_].deliveryAmount);
-        _userDeliveriesAmountBalance[msg.sender] -= _deliveries[deliveryId_].deliveryAmount;
-        _burn(deliveryId_);
+        _userDeliveriesAmountBalance[_deliveries[deliveryId_].parcelSender] -= _deliveries[deliveryId_].deliveryAmount;
         _deliveries[deliveryId_].status = Status.delivered;
         _deliveries[deliveryId_].deliveredTimestamp = block.timestamp;
-        _daidToken.transferFrom(
-            address(this),
-            msg.sender,
-            _deliveries[deliveryId_].deliveryAmount * ((100 - _profitRate) / 100)
-        );
-        _profit += _deliveries[deliveryId_].deliveryAmount * (_profitRate / 100);
+        _daidToken.transfer(msg.sender, (_deliveries[deliveryId_].deliveryAmount * (100 - _profitRate)) / 100);
+        _profit += (_deliveries[deliveryId_].deliveryAmount * _profitRate) / 100;
+        _burn(deliveryId_);
+        emit Delivered(_deliveries[deliveryId_].parcelSender, msg.sender, deliveryId_);
         return true;
     }
 
@@ -231,8 +237,8 @@ contract FastDeliveryNft is ERC721 {
         return _deliveryId.current() - 1;
     }
 
-    function getUserDeliveriesAmountBalance() public view returns (uint256) {
-        return _userDeliveriesAmountBalance[msg.sender];
+    function getUserDeliveriesAmountBalance(address parcel_Sender_) public view returns (uint256) {
+        return _userDeliveriesAmountBalance[parcel_Sender_];
     }
 
     function getProfitBalance() public view returns (uint256) {
