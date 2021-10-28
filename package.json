@@ -36,7 +36,7 @@
     "ethers": "5.4.4",
     "express": "4.17.1",
     "framer-motion": "4.1.17",
-    "hardhat": "2.6.0",
+    "hardhat": "2.6.7",
     "hardhat-docgen": "1.1.1",
     "prettier": "2.3.2",
     "prettier-plugin-solidity": "1.0.0-beta.17",
