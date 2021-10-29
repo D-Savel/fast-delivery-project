@@ -38,7 +38,7 @@
     "framer-motion": "4.1.17",
     "hardhat": "2.6.7",
     "hardhat-docgen": "1.1.2",
-    "prettier": "2.3.2",
+    "prettier": "2.4.1",
     "prettier-plugin-solidity": "1.0.0-beta.18",
     "prisma": "2.29.1",
     "react": "17.0.2",
