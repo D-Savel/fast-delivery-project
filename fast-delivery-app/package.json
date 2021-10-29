@@ -16,7 +16,7 @@
     "@testing-library/user-event": "12.8.3",
     "axios": "0.24.0",
     "dotenv": "10.0.0",
-    "ethers": "5.4.4",
+    "ethers": "5.5.1",
     "framer-motion": "4.1.17",
     "ol": "6.6.1",
     "random-js": "2.1.0",
