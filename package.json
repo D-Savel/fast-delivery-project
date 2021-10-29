@@ -35,7 +35,7 @@
     "ethereum-waffle": "3.4.0",
     "ethers": "5.5.1",
     "express": "4.17.1",
-    "framer-motion": "4.1.17",
+    "framer-motion": "5.0.0",
     "hardhat": "2.6.7",
     "hardhat-docgen": "1.1.2",
     "prettier": "2.4.1",
