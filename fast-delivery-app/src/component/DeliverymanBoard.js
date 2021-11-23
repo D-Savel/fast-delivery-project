@@ -154,7 +154,7 @@ function DeliverymanBoard(props) {
         getAllDeliveries()
       }
       getAllDeliveries()
-      console.log(deliveriesList, 'List Deliveryman Board')
+      // console.log(deliveriesList, 'List Deliveryman Board')
 
       const inDeliveryFilter = fastDeliveryNft.filters.InDelivery(null, web3State.account)
       const attributedFilter = fastDeliveryNft.filters.Attributed(null, web3State.account)
@@ -301,7 +301,7 @@ function DeliverymanBoard(props) {
         width: "100%",
         height: "400px"
       }}>
-        <MapWrapper features={features} deliveriesList={deliveriesList} />
+        <MapWrapper />
       </div>
     </>
   )
