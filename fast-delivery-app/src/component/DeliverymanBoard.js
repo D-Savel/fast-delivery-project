@@ -1,4 +1,5 @@
 import { useContext, useState, useEffect } from 'react'
+import MapWrapper from './MapWrapper';
 import {
   Text,
   HStack,
@@ -14,6 +15,10 @@ import { Web3Context } from 'web3-hooks'
 import { FastDeliveryNftContext } from '../App'
 import { FastDeliveryUserContext } from '../App'
 import { ethers } from 'ethers'
+
+// openlayers
+import GeoJSON from 'ol/format/GeoJSON'
+import Feature from 'ol/Feature';
 
 function DeliverymanBoard(props) {
   const { selectedId, setSelectedId } = props
@@ -118,6 +123,8 @@ function DeliverymanBoard(props) {
               recipientLastName: deliveryInfo.recipientLastName,
               recipientAddress: deliveryInfo.recipientAddress,
               recipientAddressInfo: deliveryInfo.recipientAddressInfo,
+              latRecipient: deliveryInfo.recipientAddressX,
+              lonRecipient: deliveryInfo.recipientAddressY,
               recipientTel: deliveryInfo.recipientTel,
               recipientMail: deliveryInfo.recipientMail,
               deliveryAmount: Number(ethers.utils.formatEther(deliveryInfo.deliveryAmount)) * 0.8,
@@ -147,6 +154,7 @@ function DeliverymanBoard(props) {
         getAllDeliveries()
       }
       getAllDeliveries()
+      // console.log(deliveriesList, 'List Deliveryman Board')
 
       const inDeliveryFilter = fastDeliveryNft.filters.InDelivery(null, web3State.account)
       const attributedFilter = fastDeliveryNft.filters.Attributed(null, web3State.account)
@@ -198,6 +206,35 @@ function DeliverymanBoard(props) {
     }
   }
   */
+
+
+  // set intial state
+  const [features, setFeatures] = useState([])
+
+  // initialization - retrieve GeoJSON features from Mock JSON API get features from mock 
+  //  GeoJson API (read from flat .json file in public directory)
+  useEffect(() => {
+
+    fetch('/mock-geojson-api.json')
+      .then(response => response.json())
+      .then((fetchedFeatures) => {
+
+        // parse fetched geojson into OpenLayers features
+        //  use options to convert feature from EPSG:4326 to EPSG:3857
+        const wktOptions = {
+          dataProjection: 'EPSG:4326',
+          featureProjection: 'EPSG:3857'
+        }
+        const parsedFeatures = new GeoJSON().readFeatures(fetchedFeatures, wktOptions)
+
+        // set features into state (which will be passed into OpenLayers
+        //  map component as props)
+        setFeatures(parsedFeatures)
+
+      })
+
+  }, [])
+
 
 
   return (
@@ -260,6 +297,12 @@ function DeliverymanBoard(props) {
           .length < 1 && !displayAddDeliveryForDeliveryMan === true &&
         <Text> You don't have any delivery registered</Text>
       }
+      <div style={{
+        width: "100%",
+        height: "400px"
+      }}>
+        <MapWrapper />
+      </div>
     </>
   )
 

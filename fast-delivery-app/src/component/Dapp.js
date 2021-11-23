@@ -45,7 +45,9 @@ function Dapp() {
               <Route path='/CreateUser'>
                 <CreateUser userAddress={userAddress} setUserAddress={setUserAddress} userProfil={userProfil} setUserProfil={setUserProfil} />
               </Route>
-              <Route path='/GetTokens' component={GetTokens} />
+              <Route path='/GetTokens'>
+                <GetTokens />
+              </Route>
               <Route path='/'>
                 <LandingPage userAddress={userAddress} setUserAddress={setUserAddress} userProfil={userProfil} setUserProfil={setUserProfil} />
               </Route>
