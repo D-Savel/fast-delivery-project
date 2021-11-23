@@ -39,7 +39,6 @@ const MapWrapper = () => {
             <FullScreenControl />
             <ZoomButtons />
             <ScaleLineControl />
-            <GeolocateButton />
           </Controls>
         </Map>
         <div>
