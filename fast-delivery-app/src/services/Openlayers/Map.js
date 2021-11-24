@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import "./Map.css";
-import MapContext from "/home/savel/Alyra/fast-delivery-project/fast-delivery-app/src/context/MapContext";
+import MapContext from "/home/savel/Alyra/essai/fast-delivery-project/fast-delivery-app/src/context/MapContext";
 import * as ol from "ol";
 
 const Map = ({ children, zoom, center }) => {
