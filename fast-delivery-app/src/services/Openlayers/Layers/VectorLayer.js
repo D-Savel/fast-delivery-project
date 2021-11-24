@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import MapContext from "/home/savel/Alyra/fast-delivery-project/fast-delivery-app/src/context/MapContext";
+import MapContext from "context/MapContext.js";
 import OLVectorLayer from "ol/layer/Vector";
 const VectorLayer = ({ source, style, zIndex = 0 }) => {
   const { map } = useContext(MapContext);
@@ -13,7 +13,7 @@ const VectorLayer = ({ source, style, zIndex = 0 }) => {
         map.removeLayer(vectorLayer);
       }
     };
-  }, [map]);
+  }, [map, source, style, zIndex]);
   return null;
 };
 

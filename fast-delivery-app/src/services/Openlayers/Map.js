@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import "./Map.css";
-import MapContext from "/home/savel/Alyra/fast-delivery-project/fast-delivery-app/src/context/MapContext";
+import MapContext from "context/MapContext.js";
 import * as ol from "ol";
 
 const Map = ({ children, zoom, center }) => {
@@ -20,7 +20,7 @@ const Map = ({ children, zoom, center }) => {
     mapObject.setTarget(mapRef.current);
     setMap(mapObject);
     return () => mapObject.setTarget(undefined);
-  }, []);
+  }, [center, zoom]);
   // zoom change handler
 
   useEffect(() => {

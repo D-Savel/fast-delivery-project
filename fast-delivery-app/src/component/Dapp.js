@@ -4,7 +4,7 @@ import LandingPage from './LandingPage'
 import GetTokens from './GetTokens'
 import { useContext, useState } from 'react'
 import { Web3Context } from 'web3-hooks'
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Link as ReachLink } from 'react-router-dom'
 import {
   Box,
@@ -23,7 +23,7 @@ function Dapp() {
 
   return (
     <>
-      <Router>
+      <BrowserRouter>
         <Box position="sticky" w="100%" top="0" zIndex="sticky">
           <HStack as="nav" bg="gray.300" py="1">
             <Link as={ReachLink} to={'/Home'} px="5">Home</Link>
@@ -38,26 +38,17 @@ function Dapp() {
               <Center px="2" mt="10" mb="5" w="75%" py="12" bg="red.500" fontSize="20" color="white">Vous devez vous connecter à MetaMask sur le TestNet Kovan</Center>
               <Button colorScheme="orange" onClick={login}>login MetaMask</Button>
             </> :
-            <Switch>
-              <Route path='/Home'>
-                <LandingPage userAddress={userAddress} setUserAddress={setUserAddress} userProfil={userProfil} setUserProfil={setUserProfil} />
-              </Route>
-              <Route path='/CreateUser'>
-                <CreateUser userAddress={userAddress} setUserAddress={setUserAddress} userProfil={userProfil} setUserProfil={setUserProfil} />
-              </Route>
-              <Route path='/GetTokens'>
-                <GetTokens />
-              </Route>
-              <Route path='/'>
-                <LandingPage userAddress={userAddress} setUserAddress={setUserAddress} userProfil={userProfil} setUserProfil={setUserProfil} />
-              </Route>
-            </Switch>
+            <Routes>
+              <Route path="/Home" element={<LandingPage userAddress={userAddress} setUserAddress={setUserAddress} userProfil={userProfil} setUserProfil={setUserProfil} />} />
+              <Route path="/CreateUser" element={<CreateUser userAddress={userAddress} setUserAddress={setUserAddress} userProfil={userProfil} setUserProfil={setUserProfil} />} />
+              <Route path="/GetTokens" element={<GetTokens />} />
+              <Route path="/" element={<LandingPage userAddress={userAddress} setUserAddress={setUserAddress} userProfil={userProfil} setUserProfil={setUserProfil} />} />
+            </Routes>
           }
         </VStack>
-      </Router>
+      </BrowserRouter>
       <Footer />
     </>
   )
 }
 export default Dapp
-

@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import MapContext from "/home/savel/Alyra/fast-delivery-project/fast-delivery-app/src/context/MapContext";
+import MapContext from "context/MapContext.js";
 import OLTileLayer from "ol/layer/Tile";
 
 const TileLayer = ({ source, zIndex = 0 }) => {
@@ -10,7 +10,7 @@ const TileLayer = ({ source, zIndex = 0 }) => {
     map.addLayer(tileLayer);
     tileLayer.setZIndex(zIndex);
     return () => { if (map) { map.removeLayer(tileLayer); } };
-  }, [map]);
+  }, [map, source, zIndex]);
   return null;
 };
 

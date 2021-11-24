@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from 'react'
-import MapWrapper from './MapWrapper';
+// import MapWrapper from './MapWrapper';
 import {
   Text,
   HStack,
@@ -17,8 +17,8 @@ import { FastDeliveryUserContext } from '../App'
 import { ethers } from 'ethers'
 
 // openlayers
-import GeoJSON from 'ol/format/GeoJSON'
-import Feature from 'ol/Feature';
+// import GeoJSON from 'ol/format/GeoJSON'
+// import Feature from 'ol/Feature';
 
 function DeliverymanBoard(props) {
   const { selectedId, setSelectedId } = props
@@ -207,36 +207,6 @@ function DeliverymanBoard(props) {
   }
   */
 
-
-  // set intial state
-  const [features, setFeatures] = useState([])
-
-  // initialization - retrieve GeoJSON features from Mock JSON API get features from mock 
-  //  GeoJson API (read from flat .json file in public directory)
-  useEffect(() => {
-
-    fetch('/mock-geojson-api.json')
-      .then(response => response.json())
-      .then((fetchedFeatures) => {
-
-        // parse fetched geojson into OpenLayers features
-        //  use options to convert feature from EPSG:4326 to EPSG:3857
-        const wktOptions = {
-          dataProjection: 'EPSG:4326',
-          featureProjection: 'EPSG:3857'
-        }
-        const parsedFeatures = new GeoJSON().readFeatures(fetchedFeatures, wktOptions)
-
-        // set features into state (which will be passed into OpenLayers
-        //  map component as props)
-        setFeatures(parsedFeatures)
-
-      })
-
-  }, [])
-
-
-
   return (
     <>
       <Box w="100%" px="2" py="2">
@@ -297,12 +267,12 @@ function DeliverymanBoard(props) {
           .length < 1 && !displayAddDeliveryForDeliveryMan === true &&
         <Text> You don't have any delivery registered</Text>
       }
-      <div style={{
+      {/* <div style={{
         width: "100%",
         height: "400px"
       }}>
         <MapWrapper />
-      </div>
+      </div> */}
     </>
   )
 

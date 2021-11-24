@@ -1,6 +1,6 @@
 import { useContext, useEffect } from "react";
 import { ScaleLine } from "ol/control";
-import MapContext from "/home/savel/Alyra/fast-delivery-project/fast-delivery-app/src/context/MapContext";
+import MapContext from "context/MapContext.js";
 
 const ScaleLineControl = () => {
   const { map } = useContext(MapContext);

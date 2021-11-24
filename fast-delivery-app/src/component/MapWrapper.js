@@ -1,12 +1,12 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import {
   Box,
   Flex,
-  Vstack,
 } from '@chakra-ui/react'
 import Map from "../services/Openlayers/Map";
 import { Layers, TileLayer, VectorLayer } from "../services/Openlayers/Layers";
-import { Controls, FullScreenControl, ZoomButtons, ScaleLineControl, GeolocateButton } from "../services/Openlayers/Controls";
+import { Controls, FullScreenControl, ZoomButtons, ScaleLineControl } from "../services/Openlayers/Controls";
 import { styles } from "../services/Openlayers/Features/Styles";
 import { osm, vector } from "../services/Openlayers/Source";
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
@@ -41,14 +41,6 @@ const MapWrapper = () => {
             <ScaleLineControl />
           </Controls>
         </Map>
-        <div>
-          <input type="checkbox" checked={showLayer1} onChange={event => setShowLayer1(event.target.checked)} />
-          Johnson County
-        </div>
-        <div>
-          <input type="checkbox" checked={showLayer2} onChange={event => setShowLayer2(event.target.checked)} />
-          Wyandotte County
-        </div>
       </Box>
     </Flex>
   );
