@@ -3,7 +3,7 @@
 
 Fast Delivery project is an online express parcel delivery service. It allows the connection between shippers and deliverers. it also ensures, through the blockchain and an NFT, the tracking of the parcel (online publishing package, pick-up, delivery, time-stamping) as well as the automatic payment of the deliverer at the time of delivery.
 
-## DApp screenshot
+## DApp screenshots
 
 **Account registration**
 
