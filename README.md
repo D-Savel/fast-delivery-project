@@ -3,6 +3,10 @@
 
 Fast Delivery project is an online express parcel delivery service. It allows the connection between shippers and deliverers. it also ensures, through the blockchain and an NFT, the tracking of the parcel (online publishing package, pick-up, delivery, time-stamping) as well as the automatic payment of the deliverer at the time of delivery.
 
+** DApp screenshots
+
+![alt Deliveryman board](https://github.com/D-Savel/fast-delivery-project/blob/main/Screenshots/DeliverymanBoardScreenshot.png?raw=true)
+
 **For using App you must have MetaMask extension installed and connected to kovan, rinkeby or ropsten test network.**
 
 ## Using App ##
