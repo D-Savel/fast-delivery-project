@@ -2,8 +2,8 @@
 /* eslint-disable no-undef */
 const hre = require('hardhat');
 
-const TOKENCONTRACTADDRESS = '0xCe9C1509E195275B873A509dd56a356bfF13f0b7'
-const FAUCETCONTRACTADDRESS = '0xf6977087EE2560d2Df84DEB7F0Cc79c579aaE7C1'
+const TOKENCONTRACTADDRESS = '0x46b2FF8987A79269077402Dd945923C7F6cdb23d'
+const FAUCETCONTRACTADDRESS = '0xe6300dfDbC1199A8cA704851ec5a294b2988898c'
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command

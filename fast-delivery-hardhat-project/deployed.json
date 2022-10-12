@@ -1,1 +1,58 @@
-{"DaidToken":{"kovan":{"address":"0xCe9C1509E195275B873A509dd56a356bfF13f0b7"},"ropsten":{"address":"0xCe9C1509E195275B873A509dd56a356bfF13f0b7"},"rinkeby":{"address":"0xCe9C1509E195275B873A509dd56a356bfF13f0b7"}},"Faucet":{"kovan":{"address":"0xf6977087EE2560d2Df84DEB7F0Cc79c579aaE7C1"},"ropsten":{"address":"0xf6977087EE2560d2Df84DEB7F0Cc79c579aaE7C1"},"rinkeby":{"address":"0xf6977087EE2560d2Df84DEB7F0Cc79c579aaE7C1"}},"FastDeliveryNft":{"kovan":{"address":"0xe2305AC112134A52b7dd624dC311A3885359f65D"},"ropsten":{"address":"0xe2305AC112134A52b7dd624dC311A3885359f65D"},"rinkeby":{"address":"0xe2305AC112134A52b7dd624dC311A3885359f65D"}},"FastDeliveryUser":{"kovan":{"address":"0x363f03F22BF16EDe785783A756C794914D00469d"},"ropsten":{"address":"0x363f03F22BF16EDe785783A756C794914D00469d"},"rinkeby":{"address":"0x363f03F22BF16EDe785783A756C794914D00469d"}}}
+{
+  "DaidToken": {
+    "kovan": {
+      "address": "0xCe9C1509E195275B873A509dd56a356bfF13f0b7"
+    },
+    "ropsten": {
+      "address": "0xCe9C1509E195275B873A509dd56a356bfF13f0b7"
+    },
+    "rinkeby": {
+      "address": "0xCe9C1509E195275B873A509dd56a356bfF13f0b7"
+    },
+    "goerli": {
+      "address": "0x46b2FF8987A79269077402Dd945923C7F6cdb23d"
+    }
+  },
+  "Faucet": {
+    "kovan": {
+      "address": "0xf6977087EE2560d2Df84DEB7F0Cc79c579aaE7C1"
+    },
+    "ropsten": {
+      "address": "0xf6977087EE2560d2Df84DEB7F0Cc79c579aaE7C1"
+    },
+    "rinkeby": {
+      "address": "0xf6977087EE2560d2Df84DEB7F0Cc79c579aaE7C1"
+    },
+    "goerli": {
+      "address": "0xe6300dfDbC1199A8cA704851ec5a294b2988898c"
+    }
+  },
+  "FastDeliveryNft": {
+    "kovan": {
+      "address": "0xe2305AC112134A52b7dd624dC311A3885359f65D"
+    },
+    "ropsten": {
+      "address": "0xe2305AC112134A52b7dd624dC311A3885359f65D"
+    },
+    "rinkeby": {
+      "address": "0xe2305AC112134A52b7dd624dC311A3885359f65D"
+    },
+    "goerli": {
+      "address": "0x4626FB4C9A57B86c4204756121A897c65D592321"
+    }
+  },
+  "FastDeliveryUser": {
+    "kovan": {
+      "address": "0x363f03F22BF16EDe785783A756C794914D00469d"
+    },
+    "ropsten": {
+      "address": "0x363f03F22BF16EDe785783A756C794914D00469d"
+    },
+    "rinkeby": {
+      "address": "0x363f03F22BF16EDe785783A756C794914D00469d"
+    },
+    "goerli": {
+      "address": "0x551625AaAc8Cda8898707F1f59187871478885b2"
+    }
+  }
+}

@@ -3,7 +3,7 @@
 const hre = require('hardhat');
 const { deployed } = require('./deployed');
 
-const TOKENCONTRACTADDRESS = '0xCe9C1509E195275B873A509dd56a356bfF13f0b7'
+const TOKENCONTRACTADDRESS = '0x46b2FF8987A79269077402Dd945923C7F6cdb23d'
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command

@@ -21,7 +21,7 @@ Fast Delivery project is an online express parcel delivery service. It allows th
 
 ![alt parcel sender board](https://github.com/D-Savel/fast-delivery-project/blob/main/Screenshots/DeliverymanBoardScreenshot.png?raw=true)
 
-**For using App you must have MetaMask extension installed and connected to kovan, rinkeby or ropsten test network.**
+**For using App you must have MetaMask extension installed and connected to georli test network.**
 
 ## Using App ##
 

@@ -51,7 +51,7 @@ app.use(logger)
 app.use(shower)
 
 let transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
+  host: 'smtp.mailtrap.io',
   port: 465,
   secure: true,
   auth: {
